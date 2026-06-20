@@ -1,0 +1,45 @@
+{
+  "schema": "agentic.factory.WorkOrderState.v1",
+  "work_order_id": "WO-0001",
+  "module": "TBD",
+  "task_type": "docs-only",
+  "status": "PLANNED",
+  "owner": "pm",
+  "next_agent": "pm",
+  "allowed_transitions": {
+    "PLANNED": ["IN_PROGRESS"],
+    "IN_PROGRESS": ["QA_PENDING", "FAILED"],
+    "QA_PENDING": ["FAILED", "COMPLETED"],
+    "FAILED": ["IN_PROGRESS"],
+    "COMPLETED": []
+  },
+  "requested_transition": {
+    "from": "PLANNED",
+    "to": "IN_PROGRESS",
+    "requested_by": "pm",
+    "reason": "Initial template state; fill project details before implementation."
+  },
+  "quality_gates": {
+    "factory_check_passed": false,
+    "contract_artifacts_valid": false,
+    "test_matrix_criteria_met": false,
+    "qa_passed": false,
+    "review_passed": false
+  },
+  "artifacts": {
+    "api_contract": "project/modules/TBD/api.contract.md",
+    "ui_contract": "project/modules/TBD/ui.contract.md",
+    "dto": "project/modules/TBD/dto.md",
+    "data_model": "project/modules/TBD/data-model.md",
+    "test_matrix": "project/modules/TBD/test-matrix.md",
+    "handoff": "project/modules/TBD/handoff.md"
+  },
+  "mcp": {
+    "source_of_truth": "project/work-orders/state.json",
+    "structured_handoffs_required": true,
+    "active_work_order_md_is_mirror": true
+  },
+  "notes": [
+    "active-work-order.md is deprecated as primary state and must mirror this JSON."
+  ]
+}

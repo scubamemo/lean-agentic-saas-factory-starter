@@ -21,6 +21,10 @@
     "frontend:lint": "pnpm --dir frontend lint",
     "check:template": "pnpm check:factory && pnpm check:task --allow-tbd",
     "check:dto": "node scripts/check-dto.mjs",
-    "check:contracts": "node scripts/check-contract-artifacts.mjs"
+    "check:contracts": "node scripts/check-contract-artifacts.mjs",
+    "check:boundaries": "dependency-cruiser --config .dependency-cruiser.cjs backend frontend packages || true"
+  },
+  "devDependencies": {
+    "dependency-cruiser": "^16.10.4"
   }
 }

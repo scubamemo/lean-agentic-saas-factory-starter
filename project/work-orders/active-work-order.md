@@ -1,5 +1,10 @@
 # Active Work Order
 
+## State source of truth
+
+`project/work-orders/state.json` is the primary state source for all agents and validators. This markdown file is a human-readable mirror and planning aid only. Do not advance a handoff by editing this file alone; update `state.json` first, then mirror the relevant summary here.
+
+
 ## ID
 
 WO-0001
@@ -43,7 +48,7 @@ Tests/checks run
 State Transition DTO
 ```
 
-The active work order is the source of truth for the next transition.
+`project/work-orders/state.json` is the source of truth for the next transition; this file must be updated as a mirror before handoff.
 
 ## Development chain
 
@@ -102,6 +107,7 @@ Every handoff must update or explicitly re-validate the relevant artifact:
 - .agents/rules/guardrails.md
 - .agents/rules/mcp-communication.md
 - project/CONTEXT.md
+- project/work-orders/state.json
 - project/work-orders/active-work-order.md
 - project/modules/<module>/context.md
 - project/modules/<module>/MODULE.md

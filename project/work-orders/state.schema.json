@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agentic.factory.WorkOrderState.v1",
+  "title": "Agentic Factory Work Order State",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "work_order_id",
+    "module",
+    "task_type",
+    "status",
+    "owner",
+    "next_agent",
+    "allowed_transitions",
+    "quality_gates",
+    "artifacts",
+    "mcp"
+  ],
+  "properties": {
+    "schema": { "const": "agentic.factory.WorkOrderState.v1" },
+    "work_order_id": { "type": "string", "pattern": "^WO-[0-9A-Za-z._-]+$" },
+    "module": { "type": "string", "minLength": 1 },
+    "task_type": {
+      "type": "string",
+      "enum": ["docs-only", "contract-only", "backend-only", "frontend-only", "data-model", "full-stack", "bugfix", "refactor", "review", "release"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["PLANNED", "IN_PROGRESS", "QA_PENDING", "FAILED", "COMPLETED"]
+    },
+    "owner": { "type": "string", "minLength": 1 },
+    "next_agent": { "type": "string", "minLength": 1 },
+    "allowed_transitions": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string", "enum": ["PLANNED", "IN_PROGRESS", "QA_PENDING", "FAILED", "COMPLETED"] }
+      }
+    },
+    "requested_transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to", "requested_by", "reason"],
+      "properties": {
+        "from": { "type": "string" },
+        "to": { "type": "string" },
+        "requested_by": { "type": "string" },
+        "reason": { "type": "string" }
+      }
+    },
+    "quality_gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["factory_check_passed", "contract_artifacts_valid", "test_matrix_criteria_met", "qa_passed", "review_passed"],
+      "properties": {
+        "factory_check_passed": { "type": "boolean" },
+        "contract_artifacts_valid": { "type": "boolean" },
+        "test_matrix_criteria_met": { "type": "boolean" },
+        "qa_passed": { "type": "boolean" },
+        "review_passed": { "type": "boolean" }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["api_contract", "ui_contract", "dto", "data_model", "test_matrix", "handoff"],
+      "properties": {
+        "api_contract": { "type": "string" },
+        "ui_contract": { "type": "string" },
+        "dto": { "type": "string" },
+        "data_model": { "type": "string" },
+        "test_matrix": { "type": "string" },
+        "handoff": { "type": "string" }
+      }
+    },
+    "mcp": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_of_truth", "structured_handoffs_required", "active_work_order_md_is_mirror"],
+      "properties": {
+        "source_of_truth": { "const": "project/work-orders/state.json" },
+        "structured_handoffs_required": { "type": "boolean" },
+        "active_work_order_md_is_mirror": { "type": "boolean" }
+      }
+    }
+  }
+}

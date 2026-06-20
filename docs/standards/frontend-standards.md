@@ -91,3 +91,25 @@ UI is not complete until:
 - `test-matrix.md` evidence is updated,
 - loading/empty/error/forbidden/success states are verified,
 - `pnpm --dir frontend check` passes when frontend changed.
+
+## Contract source of truth and duplication ban
+
+`packages/contracts/` is the mandatory source of truth for shared data models, DTOs, API schemas, event payloads and communication contracts.
+
+Frontend modules must not duplicate business logic or public data structures outside `packages/contracts/`. UI view models may adapt contract data for presentation, but request/response DTOs, event payloads and permission constants must come from `packages/contracts/` or generated client code derived from it.
+
+Forbidden frontend patterns:
+
+- importing backend modules directly,
+- redefining backend DTOs inside `frontend/`,
+- creating UI behavior that conflicts with `ui.contract.md`,
+- using ad-hoc CSS, inline theme styles or unapproved design tokens,
+- writing to `packages/contracts/` unless the active work order explicitly assigns contract maintenance to the frontend agent.
+
+Required frontend workflow:
+
+1. Read `project/work-orders/state.json`, `project/UI.md`, target `ui.contract.md`, `api.contract.md`, `dto.md` and `permissions.md`.
+2. Consume contract DTOs/types from `packages/contracts/` or generated `packages/api-client/` outputs.
+3. Reuse existing components from `frontend/src/components/` before creating new components.
+4. Document reusable components in `frontend/src/components/COMPONENTS.md`.
+5. Run `node scripts/factory-check.mjs` before handoff.
