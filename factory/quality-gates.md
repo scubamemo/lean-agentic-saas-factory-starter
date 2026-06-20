@@ -34,3 +34,12 @@ Use these gates as a practical checklist, not bureaucracy.
 - Tenant isolation or permission model change.
 - Destructive migration or data backfill.
 - Product behavior not specified by project/module docs.
+
+
+## V13 lightweight gates
+
+- Run `pnpm check:task` before implementation.
+- Run `pnpm check:project` before marking production-ready work as done.
+- Handoffs must include State Transition DTOs.
+- QA and Reviewer must not fix implementation failures; they route feedback DTOs back to the original developer.
+- Data model changes touching Prisma must be owned or approved by Data Engineer.

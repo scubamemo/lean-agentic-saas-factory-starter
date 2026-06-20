@@ -19,7 +19,7 @@ TBD
   "target_agent": "pm",
   "work_order_id": "WO-0001",
   "contract_version": "0.1.0",
-  "module": "<module-name>",
+  "module": "sample-resource",
   "current_state": "PLANNED",
   "next_state": "READY",
   "payload": {

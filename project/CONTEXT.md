@@ -39,3 +39,12 @@ TBD
 ## Open project questions
 
 - TBD
+
+
+## V13 Lean Cyclic Additions
+
+- Use structured State Transition DTOs for agent handoffs.
+- Follow `.agents/rules/guardrails.md` before writing files.
+- Use Data Engineer for Prisma schema, tenant isolation and destructive migration review.
+- Use cyclic feedback: QA/Reviewer report failures; original developer fixes.
+- Keep `project/CONTEXT.md` and module `context.md` updated when project or contract decisions change.

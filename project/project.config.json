@@ -4,5 +4,9 @@
   "architectureProfile": "simple-saas",
   "tenancyMode": "shared-db-tenant-id",
   "dedicatedInstanceSupported": true,
-  "projectMode": "template"
+  "projectMode": "template",
+  "factoryVersion": "13.0.0-lean-cyclic",
+  "cyclicWorkflow": true,
+  "mcpStructuredHandoffs": true,
+  "dataEngineerOwnsPrisma": true
 }

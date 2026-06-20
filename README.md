@@ -44,3 +44,8 @@ scripts/       Minimal validation/export helpers
 - No mandatory JSON sidecars for every log.
 - No full repo scan by default.
 - No frontend/backend implementation cross-reading by default.
+
+
+## V13 lean cyclic workflow
+
+This version keeps the lean v12 workflow but adds structured MCP-compatible DTO handoffs, directory RBAC guardrails, a Data Engineer role for Prisma/schema ownership, task readiness checks, module/work-order generators and cyclic QA/review feedback.

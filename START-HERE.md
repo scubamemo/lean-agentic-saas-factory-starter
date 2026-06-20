@@ -41,3 +41,15 @@ Open a blocker in the target module's `handoff.md` if the task affects:
 - payment/billing,
 - security-sensitive authentication/session behavior,
 - unclear product behavior.
+
+
+## Fast start helpers
+
+```bash
+pnpm new:module <module-name>
+pnpm new:work-order WO-0001 <module-name> backend-only
+pnpm check:task
+pnpm check:project
+```
+
+Use `.agents/workflows/cyclic-development.md` for implementation work.
