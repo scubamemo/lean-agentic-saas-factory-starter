@@ -5,6 +5,34 @@
 **DEPRECATED AS PRIMARY STATE:** `project/work-orders/active-work-order.md` is a human-readable mirror only. `project/work-orders/state.json` is the single source of truth for all agents, validators, status transitions, ownership and validation errors. Do not manually advance workflow state by editing this file. Update `state.json` first, then mirror the relevant summary here.
 
 
+## Lazy context and rolling history
+
+Historical context must not be loaded from completed work-order markdown or old handoff logs. If an agent needs previous-step context, it must read only:
+
+```text
+project/work-orders/history-summary.json
+```
+
+This file contains compact structural deltas only. Agents must not paste raw logs or long prose into it.
+
+## Delta-only writing
+
+Agents must not rewrite whole project markdown files to report state changes. Update only `project/work-orders/state.json` and only the payload key assigned to the current skill boundary:
+
+```text
+pm -> agent_payloads.pm_status
+architect -> agent_payloads.architect_status
+designer -> agent_payloads.ui_status
+data-engineer -> agent_payloads.data_status
+backend-developer -> agent_payloads.backend_status
+frontend-developer -> agent_payloads.ui_status
+qa -> agent_payloads.qa_status
+code-reviewer -> agent_payloads.review_status
+```
+
+Mirror markdown may be updated only after `state.json` is updated.
+
+
 ## ID
 
 WO-0001
@@ -30,6 +58,7 @@ Before any `New Module` or `Feature Development` phase starts, the responsible a
 node scripts/factory-check.mjs
 node scripts/check-contract-artifacts.mjs
 node scripts/check-dependencies.mjs
+node scripts/check-template-cache.mjs
 node scripts/task-ready-check.mjs
 ```
 

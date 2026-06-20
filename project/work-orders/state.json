@@ -1,5 +1,5 @@
 {
-  "schema": "agentic.factory.WorkOrderState.v2",
+  "schema": "agentic.factory.WorkOrderState.v3",
   "work_order_id": "WO-0001",
   "module": "TBD",
   "task_type": "docs-only",
@@ -39,6 +39,8 @@
     "factory_check_passed": false,
     "dependency_check_passed": false,
     "contract_artifacts_valid": false,
+    "dto_check_passed": false,
+    "template_cache_valid": false,
     "test_matrix_criteria_met": false,
     "qa_passed": false,
     "review_passed": false
@@ -54,11 +56,73 @@
   "mcp": {
     "source_of_truth": "project/work-orders/state.json",
     "structured_handoffs_required": true,
-    "active_work_order_md_is_mirror": true
+    "active_work_order_md_is_mirror": true,
+    "lazy_context_required": true
   },
   "notes": [
-    "active-work-order.md is deprecated as primary state and must mirror this JSON.",
-    "Agents must never manually advance workflow state by editing active-work-order.md alone.",
-    "All agent state writes must target project/work-orders/state.json first."
-  ]
+    "state.json is the only workflow source of truth.",
+    "active-work-order.md is a human-readable mirror only.",
+    "Agents must use history-summary.json for historical context instead of reading completed work-order markdown or old handoff logs.",
+    "Agents must write only their assigned agent_payloads key when reporting phase deltas."
+  ],
+  "history_summary": "project/work-orders/history-summary.json",
+  "template_cache": "project/work-orders/template-structure-cache.json",
+  "delta_policy": {
+    "delta_only_writing": true,
+    "forbid_full_markdown_rewrites": true,
+    "role_payload_keys": {
+      "pm": "pm_status",
+      "architect": "architect_status",
+      "data-engineer": "data_status",
+      "backend-developer": "backend_status",
+      "frontend-developer": "ui_status",
+      "qa": "qa_status",
+      "code-reviewer": "review_status",
+      "designer": "ui_status"
+    }
+  },
+  "agent_payloads": {
+    "pm_status": {
+      "status": "pending",
+      "summary": "Initial template planning payload. Replace with a delta only when PM changes scope.",
+      "updated_by": "system",
+      "changed_artifacts": []
+    },
+    "architect_status": {
+      "status": "pending",
+      "summary": "No architecture delta yet.",
+      "updated_by": "system",
+      "changed_artifacts": []
+    },
+    "data_status": {
+      "status": "pending",
+      "summary": "No data-model delta yet.",
+      "updated_by": "system",
+      "changed_artifacts": []
+    },
+    "backend_status": {
+      "status": "pending",
+      "summary": "No backend delta yet.",
+      "updated_by": "system",
+      "changed_artifacts": []
+    },
+    "ui_status": {
+      "status": "pending",
+      "summary": "No UI delta yet.",
+      "updated_by": "system",
+      "changed_artifacts": []
+    },
+    "qa_status": {
+      "status": "pending",
+      "summary": "No QA delta yet.",
+      "updated_by": "system",
+      "changed_artifacts": []
+    },
+    "review_status": {
+      "status": "pending",
+      "summary": "No review delta yet.",
+      "updated_by": "system",
+      "changed_artifacts": []
+    }
+  }
 }

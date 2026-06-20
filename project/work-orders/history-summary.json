@@ -1,0 +1,23 @@
+{
+  "schema": "agentic.factory.HistorySummary.v1",
+  "work_order_id": "WO-0001",
+  "module": "TBD",
+  "last_compacted_at": "TBD",
+  "source_of_truth": "project/work-orders/state.json",
+  "structural_deltas": [
+    {
+      "state": "PLANNED",
+      "agent": "pm",
+      "summary": "Template state. Replace TBD fields when a real project work order starts.",
+      "artifacts_changed": [
+        "project/work-orders/state.json"
+      ],
+      "checks_run": []
+    }
+  ],
+  "rules": [
+    "Agents must not read historical completed work-order markdown directly.",
+    "Agents must use this compact summary for previous-step context.",
+    "Store only structural deltas, not raw code or long logs."
+  ]
+}

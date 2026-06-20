@@ -90,9 +90,9 @@ function scanDirectImports() {
 }
 
 const requiredFiles = [
-  'START-HERE.md','AGENTS.md','project/PROJECT.md','project/UI.md','project/MODULES.md','project/CONTEXT.md','project/work-orders/state.json','project/work-orders/state.schema.json','project/work-orders/active-work-order.md',
+  'START-HERE.md','AGENTS.md','project/PROJECT.md','project/UI.md','project/MODULES.md','project/CONTEXT.md','project/work-orders/state.json','project/work-orders/state.schema.json','project/work-orders/history-summary.json','project/work-orders/template-structure-cache.json','project/work-orders/active-work-order.md',
   'project/modules/_template/MODULE.md','project/modules/_template/context.md','project/modules/_template/api.contract.md','project/modules/_template/dto.md','project/modules/_template/data-model.md','project/modules/_template/permissions.md','project/modules/_template/ui.contract.md','project/modules/_template/test-matrix.md','project/modules/_template/handoff.md',
-  '.agents/rules/global.md','.agents/rules/context-budget.md','.agents/rules/guardrails.md','.agents/rules/mcp-communication.md','.agents/routing.md','.agents/workflows/cyclic-development.md','.agents/skills/data-engineer/SKILL.md','factory/quality-gates.md','docs/patterns/common-feature-patterns.md','examples/golden/sample-resource-module/MODULE.md','examples/golden/sample-resource-module/api.contract.md','examples/golden/sample-resource-module/ui.contract.md','examples/golden/sample-resource-module/test-matrix.md','examples/golden/sample-resource-module/handoff.md','scripts/task-ready-check.mjs','scripts/check-dto.mjs','scripts/check-contract-artifacts.mjs','scripts/check-dependencies.mjs','scripts/new-module.mjs','scripts/new-work-order.mjs','project/work-orders/bugfix.md','frontend/src/components/COMPONENTS.md','packages/contracts/README.md','packages/contracts/src/index.ts','factory/dependency-cruiser.cjs','.dependency-cruiser.cjs'
+  '.agents/rules/global.md','.agents/rules/context-budget.md','.agents/rules/guardrails.md','.agents/rules/mcp-communication.md','.agents/routing.md','.agents/workflows/cyclic-development.md','.agents/skills/data-engineer/SKILL.md','factory/quality-gates.md','docs/patterns/common-feature-patterns.md','examples/golden/sample-resource-module/MODULE.md','examples/golden/sample-resource-module/api.contract.md','examples/golden/sample-resource-module/ui.contract.md','examples/golden/sample-resource-module/test-matrix.md','examples/golden/sample-resource-module/handoff.md','scripts/task-ready-check.mjs','scripts/check-dto.mjs','scripts/check-contract-artifacts.mjs','scripts/check-dependencies.mjs','scripts/check-template-cache.mjs','scripts/new-module.mjs','scripts/new-work-order.mjs','project/work-orders/bugfix.md','frontend/src/components/COMPONENTS.md','packages/contracts/README.md','packages/contracts/src/index.ts','factory/dependency-cruiser.cjs','.dependency-cruiser.cjs'
 ];
 for (const rel of requiredFiles) if (!exists(rel)) fail(`Missing required file: ${rel}`);
 if (!failed) ok('required files are present');
@@ -109,16 +109,39 @@ try {
 
 try {
   const state = JSON.parse(read('project/work-orders/state.json'));
-  if (state.schema !== 'agentic.factory.WorkOrderState.v2') fail('state.json must use agentic.factory.WorkOrderState.v2');
+  if (state.schema !== 'agentic.factory.WorkOrderState.v3') fail('state.json must use agentic.factory.WorkOrderState.v3');
   if (!state.last_updated_by) fail('state.json must include last_updated_by');
   if (!Array.isArray(state.validation_errors)) fail('state.json must include validation_errors array');
   if (state.mcp?.source_of_truth !== 'project/work-orders/state.json') fail('state.json must declare itself as MCP source of truth');
+  if (state.mcp?.lazy_context_required !== true) fail('state.json must enforce lazy_context_required=true');
+  if (state.history_summary !== 'project/work-orders/history-summary.json') fail('state.json must point to history-summary.json');
+  if (state.template_cache !== 'project/work-orders/template-structure-cache.json') fail('state.json must point to template-structure-cache.json');
+  if (state.delta_policy?.delta_only_writing !== true) fail('state.json must enable delta-only writing');
+  if (!state.agent_payloads?.ui_status || !state.agent_payloads?.backend_status || !state.agent_payloads?.qa_status) fail('state.json must define role-scoped agent_payloads');
+  if (!state.quality_gates || typeof state.quality_gates.dto_check_passed !== 'boolean') fail('state.json must include quality_gates.dto_check_passed');
+  if (!state.quality_gates || typeof state.quality_gates.template_cache_valid !== 'boolean') fail('state.json must include quality_gates.template_cache_valid');
   if (!state.allowed_transitions?.PLANNED?.includes('IN_PROGRESS')) fail('state.json must allow PLANNED -> IN_PROGRESS');
   if (!state.allowed_transitions?.IN_PROGRESS?.includes('VALIDATION_REQUIRED')) fail('state.json must allow IN_PROGRESS -> VALIDATION_REQUIRED');
   if (!state.allowed_transitions?.VALIDATION_REQUIRED?.includes('QA_PENDING') || !state.allowed_transitions?.VALIDATION_REQUIRED?.includes('FAILED')) fail('state.json must allow VALIDATION_REQUIRED -> QA_PENDING / FAILED');
   if (!state.allowed_transitions?.QA_PENDING?.includes('FAILED') || !state.allowed_transitions?.QA_PENDING?.includes('COMPLETED')) fail('state.json must allow QA_PENDING -> FAILED / COMPLETED');
   if (!failed) ok('work-order state.json is structurally valid');
 } catch (error) { fail(`project/work-orders/state.json is invalid JSON: ${error.message}`); }
+
+try {
+  const history = JSON.parse(read('project/work-orders/history-summary.json'));
+  if (history.schema !== 'agentic.factory.HistorySummary.v1') fail('history-summary.json must use agentic.factory.HistorySummary.v1');
+  if (!Array.isArray(history.structural_deltas)) fail('history-summary.json must contain structural_deltas array');
+  const serialized = JSON.stringify(history);
+  if (serialized.length > 12000) fail('history-summary.json is too large; compact historical context before continuing');
+  if (!failed) ok('rolling history summary is compact and structured');
+} catch (error) { fail(`project/work-orders/history-summary.json is invalid JSON: ${error.message}`); }
+
+try {
+  const cache = JSON.parse(read('project/work-orders/template-structure-cache.json'));
+  if (cache.schema !== 'agentic.factory.TemplateStructureCache.v1') fail('template-structure-cache.json must use agentic.factory.TemplateStructureCache.v1');
+  if (!cache.template_structure_hash || !Array.isArray(cache.required_files)) fail('template-structure-cache.json must include template_structure_hash and required_files');
+  if (!failed) ok('template structure cache is present');
+} catch (error) { fail(`project/work-orders/template-structure-cache.json is invalid JSON: ${error.message}`); }
 
 const workOrder = read('project/work-orders/active-work-order.md');
 for (const heading of ['## State source of truth','## ID','## Task type','## Status','## Context mode','## Target module','## Goal','## Acceptance criteria','## Security / tenancy trigger','## Must read','## Read by role','## Allowed write paths','## Forbidden paths by default','## State Transition DTO']) {
@@ -127,6 +150,8 @@ for (const heading of ['## State source of truth','## ID','## Task type','## Sta
 if (!workOrder.includes('project/work-orders/state.json')) fail('active work order must point to state.json as primary source of truth');
 if (!workOrder.includes('.agents/rules/mcp-communication.md')) fail('active work order must reference MCP communication rule');
 if (!workOrder.includes('Data Engineer:')) fail('active work order must include Data Engineer read set');
+if (!workOrder.includes('history-summary.json')) fail('active work order must point to history-summary.json for historical context');
+if (!workOrder.includes('Delta-only writing')) fail('active work order must document delta-only writing');
 for (const phrase of ['node scripts/factory-check.mjs','node scripts/check-contract-artifacts.mjs','node scripts/check-dependencies.mjs','node scripts/task-ready-check.mjs']) {
   if (!workOrder.includes(phrase)) fail(`active work order missing pre-development/handoff control phrase: ${phrase}`);
 }
@@ -192,7 +217,7 @@ for (const phrase of ['backend/prisma/schema.prisma','Prisma Guard','createdAt',
 if (!failed) ok('data engineer skill covers schema guardrails');
 
 const mcp = read('.agents/rules/mcp-communication.md');
-for (const phrase of ['Artifact Protocol','State Transition Schema','Task-focused MCP context loading']) {
+for (const phrase of ['Artifact Protocol','State Transition Schema','Task-focused MCP context loading','Lazy-loading context']) {
   if (!mcp.includes(phrase)) fail(`MCP communication rule missing phrase: ${phrase}`);
 }
 if (!failed) ok('MCP communication rule includes artifact protocol');
@@ -255,14 +280,14 @@ if (!failed) ok('no obvious template domain leakage');
 
 
 const leanStandard = read('docs/standards/lean-agentic-development.md');
-for (const phrase of ['check-dependencies.mjs', 'Dependency cruising', 'state.json is the single source of truth', 'packages/contracts/']) {
+for (const phrase of ['check-dependencies.mjs', 'Dependency cruising', 'state.json is the single source of truth', 'packages/contracts/','Hash-based standard verification','template-structure-cache.json']) {
   if (!leanStandard.includes(phrase)) fail(`lean-agentic-development standard missing phrase: ${phrase}`);
 }
 
 const newModuleWorkflow = read('.agents/workflows/new-module.md');
 const featureWorkflow = read('.agents/workflows/feature-development.md');
 for (const [name, text] of [['new-module workflow', newModuleWorkflow], ['feature-development workflow', featureWorkflow]]) {
-  for (const phrase of ['node scripts/factory-check.mjs', 'node scripts/check-dependencies.mjs', 'project/work-orders/state.json']) {
+  for (const phrase of ['node scripts/factory-check.mjs', 'node scripts/check-dependencies.mjs', 'node scripts/check-template-cache.mjs', 'project/work-orders/state.json']) {
     if (!text.includes(phrase)) fail(`${name} missing blocking phrase: ${phrase}`);
   }
 }
@@ -270,10 +295,25 @@ for (const [name, text] of [['new-module workflow', newModuleWorkflow], ['featur
 for (const skill of walk(path.join(root, '.agents/skills')).filter(f => f.endsWith('SKILL.md'))) {
   const rel = normalize(path.relative(root, skill));
   const text = fs.readFileSync(skill, 'utf8');
-  for (const phrase of ['Deterministic state and strict gatekeeping', 'project/work-orders/state.json', 'node scripts/factory-check.mjs', 'node scripts/check-dependencies.mjs']) {
+  for (const phrase of ['Deterministic state and strict gatekeeping', 'Script-first execution rule', 'project/work-orders/state.json', 'node scripts/factory-check.mjs', 'node scripts/check-dependencies.mjs']) {
     if (!text.includes(phrase)) fail(`${rel} missing strict gatekeeping phrase: ${phrase}`);
   }
 }
 
+
+
+const routing = read('.agents/routing.md');
+for (const phrase of ['Model Tiering Matrix','Tier 1','Tier 2','scripts/new-module.mjs','cheap models']) {
+  if (!routing.includes(phrase)) fail(`routing.md missing model tiering phrase: ${phrase}`);
+}
+const globalRules = read('.agents/rules/global.md');
+for (const phrase of ['Script-first execution','Hash-based standard verification','template-structure-cache.json','history-summary.json','Tier 2']) {
+  if (!globalRules.includes(phrase)) fail(`global rules missing token-saving phrase: ${phrase}`);
+}
+const contextBudget = read('.agents/rules/context-budget.md');
+for (const phrase of ['Lazy-loading context','history-summary.json','never read historical handoff.md','node scripts/check-template-cache.mjs']) {
+  if (!contextBudget.includes(phrase)) fail(`context-budget.md missing lazy context phrase: ${phrase}`);
+}
+
 if (failed) process.exit(1);
-console.log('OK: architectural factory validator passed');
+console.log('OK: token-optimized architectural factory validator passed');

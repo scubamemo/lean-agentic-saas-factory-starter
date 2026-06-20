@@ -1,0 +1,19 @@
+{
+  "schema": "agentic.factory.TemplateStructureCache.v1",
+  "source": "project/modules/_template",
+  "generated_by": "scripts/export-template.mjs",
+  "hash_algorithm": "sha256(file-list)",
+  "template_structure_hash": "02f0f0657734ec130d6cd1c7ee132bae5a193278043bedb8f1e96cd98289bd2c",
+  "required_files": [
+    "MODULE.md",
+    "api.contract.md",
+    "context.md",
+    "data-model.md",
+    "dto.md",
+    "handoff.md",
+    "permissions.md",
+    "test-matrix.md",
+    "ui.contract.md"
+  ],
+  "standards_bypass_rule": "If a target module has this structure, agents may skip full docs/standards reads and use assumed standard context plus role-specific artifacts."
+}
