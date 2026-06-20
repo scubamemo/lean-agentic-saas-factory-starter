@@ -1,0 +1,10 @@
+.factory-meta/
+CHANGES-*.md
+*.zip
+node_modules/
+dist/
+build/
+.next/
+coverage/
+.env
+.env.local

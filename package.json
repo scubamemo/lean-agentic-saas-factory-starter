@@ -1,0 +1,17 @@
+{
+  "name": "agentic-saas-factory-starter",
+  "version": "12.0.0-lean-optimized",
+  "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "check": "node scripts/factory-check.mjs",
+    "export:template": "node scripts/export-template.mjs . ../generated-project",
+    "backend:dev": "pnpm --dir backend dev",
+    "backend:typecheck": "pnpm --dir backend typecheck",
+    "backend:test": "pnpm --dir backend test",
+    "frontend:dev": "pnpm --dir frontend dev",
+    "frontend:typecheck": "pnpm --dir frontend typecheck",
+    "frontend:test": "pnpm --dir frontend test",
+    "check:factory": "node scripts/factory-check.mjs"
+  }
+}

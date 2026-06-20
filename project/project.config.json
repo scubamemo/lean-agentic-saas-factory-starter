@@ -1,0 +1,8 @@
+{
+  "projectName": "TBD",
+  "profile": "mvp",
+  "architectureProfile": "simple-saas",
+  "tenancyMode": "shared-db-tenant-id",
+  "dedicatedInstanceSupported": true,
+  "projectMode": "template"
+}
