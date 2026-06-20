@@ -45,7 +45,10 @@ for (const heading of ['## ID','## Task type','## Status','## Context mode','## 
 }
 if (!workOrder.includes('.agents/rules/mcp-communication.md')) fail('active work order must reference MCP communication rule');
 if (!workOrder.includes('Data Engineer:')) fail('active work order must include Data Engineer read set');
-if (!failed) ok('active work order has required lean/cyclic headings');
+for (const phrase of ['node scripts/factory-check.mjs','node scripts/check-contract-artifacts.mjs','node scripts/task-ready-check.mjs','active work order is the source of truth']) {
+  if (!workOrder.includes(phrase)) fail(`active work order missing pre-development/handoff control phrase: ${phrase}`);
+}
+if (!failed) ok('active work order has required lean/cyclic headings and validation gates');
 
 const handoff = read('project/modules/_template/handoff.md');
 for (const phrase of ['Current status','Current dependencies','Next agent','Artifact sync','State Transition DTO','agentic.factory.StateTransition.v1']) {
@@ -89,6 +92,30 @@ for (const phrase of ['Tailwind','Shadcn','ad-hoc CSS','frontend/src/components/
   if (!frontendStandards.includes(phrase)) fail(`frontend standards missing phrase: ${phrase}`);
 }
 if (!failed) ok('frontend standards enforce design system');
+
+const componentCatalog = read('frontend/src/components/COMPONENTS.md');
+for (const phrase of ['Component creation protocol','Scan existing components','reuse it','refactor','Do not use hardcoded inline styles']) {
+  if (!componentCatalog.includes(phrase)) fail(`component catalog missing design-system constraint phrase: ${phrase}`);
+}
+if (!failed) ok('component catalog enforces reuse before new components');
+
+const qaSkill = read('.agents/skills/qa/SKILL.md');
+for (const phrase of ['Autonomous failure triage','code-level','project/work-orders/bugfix.md','REVISION_IN_PROGRESS','STDOUT/STDERR']) {
+  if (!qaSkill.includes(phrase)) fail(`QA skill missing autonomous self-healing phrase: ${phrase}`);
+}
+if (!failed) ok('QA skill includes autonomous bugfix routing');
+
+const bugfixWorkflow = read('.agents/workflows/bugfix.md');
+for (const phrase of ['Autonomous QA-created bugfix work order','Required handoff log update','Assigned owner','REVISION_IN_PROGRESS']) {
+  if (!bugfixWorkflow.includes(phrase)) fail(`bugfix workflow missing autonomous routing phrase: ${phrase}`);
+}
+if (!failed) ok('bugfix workflow supports autonomous QA feedback');
+
+const architectSkill = read('.agents/skills/architect/SKILL.md');
+for (const phrase of ['Read-only data model validator','backend/prisma/schema.prisma','api.contract.md','do **not** change or approve the schema','Data Engineer']) {
+  if (!architectSkill.includes(phrase)) fail(`architect skill missing read-only schema validation phrase: ${phrase}`);
+}
+if (!failed) ok('architect skill includes read-only data model validation');
 
 const removedSplitUiReferences = [
   'components.contract.md','routes.contract.md','mock-data.md','visual-qa-checklist.md',

@@ -16,6 +16,35 @@ PLANNED
 
 Allowed values: PLANNED, READY, CONTRACT_IN_PROGRESS, CONTRACT_READY, BACKEND_IN_PROGRESS, BACKEND_IMPLEMENTED, FRONTEND_IN_PROGRESS, FRONTEND_IMPLEMENTED, QA_IN_PROGRESS, REVIEW_IN_PROGRESS, REVISION_IN_PROGRESS, PASSED, DONE, BLOCKED
 
+
+## Pre-development validation
+
+Before any `New Module` or `Feature Development` phase starts, the responsible agent must run the factory consistency checks from the repository root:
+
+```bash
+node scripts/factory-check.mjs
+node scripts/check-contract-artifacts.mjs
+node scripts/task-ready-check.mjs
+```
+
+Template initialization may use `node scripts/task-ready-check.mjs --allow-tbd`; real project work must not use `--allow-tbd`.
+
+Do not start implementation if these checks fail. Fix the work order, module template, or contract artifact state first.
+
+## Handoff gate
+
+No agent may hand off work to the next agent until this active work order is updated with:
+
+```text
+current Status
+Owner / Next owner
+Contracts updated or explicitly re-validated
+Tests/checks run
+State Transition DTO
+```
+
+The active work order is the source of truth for the next transition.
+
 ## Development chain
 
 Plan -> Backend -> Frontend -> QA -> Code Reviewer
@@ -149,6 +178,7 @@ QA/reviewer:
 
 ## Required output
 
+- Pre-development checks run
 - Summary
 - Files read
 - Files changed
