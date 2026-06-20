@@ -1,5 +1,10 @@
 # Active Work Order
 
+## State source of truth
+
+**DEPRECATED AS PRIMARY STATE:** this file is a human-readable mirror only. `project/work-orders/state.json` is the single source of truth. Do not manually advance workflow state by editing this file.
+
+
 ## ID
 
 WO-XXXX
@@ -14,7 +19,7 @@ Allowed values: docs-only, contract-only, backend-only, frontend-only, data-mode
 
 PLANNED
 
-Allowed values: PLANNED, READY, CONTRACT_IN_PROGRESS, CONTRACT_READY, BACKEND_IN_PROGRESS, BACKEND_IMPLEMENTED, FRONTEND_IN_PROGRESS, FRONTEND_IMPLEMENTED, QA_IN_PROGRESS, REVIEW_IN_PROGRESS, REVISION_IN_PROGRESS, PASSED, DONE, BLOCKED
+Allowed values from `state.json`: PLANNED, IN_PROGRESS, VALIDATION_REQUIRED, QA_PENDING, COMPLETED, FAILED
 
 ## Development chain
 
@@ -64,7 +69,7 @@ Every handoff must update or explicitly re-validate the relevant artifact:
 - UI/frontend changes: `project/modules/<module>/ui.contract.md`
 - DTO/data changes: `project/modules/<module>/dto.md` and `project/modules/<module>/data-model.md`
 - QA changes: `project/modules/<module>/test-matrix.md`
-- Every transition: `project/modules/<module>/handoff.md` and this active work order
+- Every transition: `project/modules/<module>/handoff.md`, `project/work-orders/state.json`, and this mirror file
 
 ## Must read
 
@@ -73,7 +78,8 @@ Every handoff must update or explicitly re-validate the relevant artifact:
 - .agents/rules/guardrails.md
 - .agents/rules/mcp-communication.md
 - project/CONTEXT.md
-- project/work-orders/active-work-order.md
+- project/work-orders/state.json
+- project/work-orders/active-work-order.md mirror
 - project/modules/<module>/context.md
 - project/modules/<module>/MODULE.md
 
@@ -157,7 +163,8 @@ QA/reviewer:
 - Context updated: yes/no/not needed
 - Pre-write check: passed/failed/not applicable
 - Handoff updated
-- Active work order updated
+- state.json updated
+- Active work order mirror updated
 - Next owner
 - State Transition DTO
 
@@ -172,7 +179,7 @@ QA/reviewer:
   "contract_version": "0.1.0",
   "module": "TBD",
   "current_state": "PLANNED",
-  "next_state": "READY",
+  "next_state": "IN_PROGRESS",
   "payload": {
     "summary": "TBD",
     "changed_files": [],

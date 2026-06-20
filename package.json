@@ -1,6 +1,6 @@
 {
   "name": "agentic-saas-factory-starter",
-  "version": "15.0.0-lean-artifact-loop",
+  "version": "16.0.0-architectural-perfection",
   "private": true,
   "packageManager": "pnpm@9.15.4",
   "scripts": {
@@ -12,7 +12,7 @@
     "frontend:dev": "pnpm --dir frontend dev",
     "frontend:typecheck": "pnpm --dir frontend typecheck",
     "frontend:test": "pnpm --dir frontend test",
-    "check:factory": "node scripts/factory-check.mjs && node scripts/check-dto.mjs && node scripts/check-contract-artifacts.mjs",
+    "check:factory": "node scripts/factory-check.mjs && node scripts/check-dto.mjs && node scripts/check-contract-artifacts.mjs && node scripts/check-dependencies.mjs",
     "check:task": "node scripts/task-ready-check.mjs",
     "check:project": "pnpm check:factory && pnpm check:task && pnpm --dir backend check && pnpm --dir frontend check",
     "new:module": "node scripts/new-module.mjs",
@@ -22,7 +22,8 @@
     "check:template": "pnpm check:factory && pnpm check:task --allow-tbd",
     "check:dto": "node scripts/check-dto.mjs",
     "check:contracts": "node scripts/check-contract-artifacts.mjs",
-    "check:boundaries": "dependency-cruiser --config .dependency-cruiser.cjs backend frontend packages || true"
+    "check:boundaries": "node scripts/check-dependencies.mjs",
+    "check:dependencies": "node scripts/check-dependencies.mjs"
   },
   "devDependencies": {
     "dependency-cruiser": "^16.10.4"

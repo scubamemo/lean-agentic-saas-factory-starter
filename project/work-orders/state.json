@@ -1,16 +1,32 @@
 {
-  "schema": "agentic.factory.WorkOrderState.v1",
+  "schema": "agentic.factory.WorkOrderState.v2",
   "work_order_id": "WO-0001",
   "module": "TBD",
   "task_type": "docs-only",
   "status": "PLANNED",
+  "last_updated_by": "pm",
+  "validation_errors": [],
   "owner": "pm",
   "next_agent": "pm",
   "allowed_transitions": {
-    "PLANNED": ["IN_PROGRESS"],
-    "IN_PROGRESS": ["QA_PENDING", "FAILED"],
-    "QA_PENDING": ["FAILED", "COMPLETED"],
-    "FAILED": ["IN_PROGRESS"],
+    "PLANNED": [
+      "IN_PROGRESS"
+    ],
+    "IN_PROGRESS": [
+      "VALIDATION_REQUIRED",
+      "FAILED"
+    ],
+    "VALIDATION_REQUIRED": [
+      "QA_PENDING",
+      "FAILED"
+    ],
+    "QA_PENDING": [
+      "COMPLETED",
+      "FAILED"
+    ],
+    "FAILED": [
+      "IN_PROGRESS"
+    ],
     "COMPLETED": []
   },
   "requested_transition": {
@@ -21,6 +37,7 @@
   },
   "quality_gates": {
     "factory_check_passed": false,
+    "dependency_check_passed": false,
     "contract_artifacts_valid": false,
     "test_matrix_criteria_met": false,
     "qa_passed": false,
@@ -40,6 +57,8 @@
     "active_work_order_md_is_mirror": true
   },
   "notes": [
-    "active-work-order.md is deprecated as primary state and must mirror this JSON."
+    "active-work-order.md is deprecated as primary state and must mirror this JSON.",
+    "Agents must never manually advance workflow state by editing active-work-order.md alone.",
+    "All agent state writes must target project/work-orders/state.json first."
   ]
 }

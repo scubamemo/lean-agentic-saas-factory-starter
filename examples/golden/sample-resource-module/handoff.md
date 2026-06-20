@@ -21,7 +21,7 @@ TBD
   "contract_version": "0.1.0",
   "module": "sample-resource",
   "current_state": "PLANNED",
-  "next_state": "READY",
+  "next_state": "IN_PROGRESS",
   "payload": {
     "summary": "TBD",
     "changed_files": [],

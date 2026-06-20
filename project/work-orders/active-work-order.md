@@ -2,7 +2,7 @@
 
 ## State source of truth
 
-`project/work-orders/state.json` is the primary state source for all agents and validators. This markdown file is a human-readable mirror and planning aid only. Do not advance a handoff by editing this file alone; update `state.json` first, then mirror the relevant summary here.
+**DEPRECATED AS PRIMARY STATE:** `project/work-orders/active-work-order.md` is a human-readable mirror only. `project/work-orders/state.json` is the single source of truth for all agents, validators, status transitions, ownership and validation errors. Do not manually advance workflow state by editing this file. Update `state.json` first, then mirror the relevant summary here.
 
 
 ## ID
@@ -19,7 +19,7 @@ Allowed values: docs-only, contract-only, backend-only, frontend-only, data-mode
 
 PLANNED
 
-Allowed values: PLANNED, READY, CONTRACT_IN_PROGRESS, CONTRACT_READY, BACKEND_IN_PROGRESS, BACKEND_IMPLEMENTED, FRONTEND_IN_PROGRESS, FRONTEND_IMPLEMENTED, QA_IN_PROGRESS, REVIEW_IN_PROGRESS, REVISION_IN_PROGRESS, PASSED, DONE, BLOCKED
+Allowed values from `state.json`: PLANNED, IN_PROGRESS, VALIDATION_REQUIRED, QA_PENDING, COMPLETED, FAILED
 
 
 ## Pre-development validation
@@ -29,6 +29,7 @@ Before any `New Module` or `Feature Development` phase starts, the responsible a
 ```bash
 node scripts/factory-check.mjs
 node scripts/check-contract-artifacts.mjs
+node scripts/check-dependencies.mjs
 node scripts/task-ready-check.mjs
 ```
 
@@ -48,7 +49,7 @@ Tests/checks run
 State Transition DTO
 ```
 
-`project/work-orders/state.json` is the source of truth for the next transition; this file must be updated as a mirror before handoff.
+`project/work-orders/state.json` is the source of truth for the next transition. This file must be updated only as a mirror after `state.json` changes. Agents must never use this markdown file as the primary state store.
 
 ## Development chain
 
@@ -92,13 +93,13 @@ If yes, read the relevant parts of `docs/SECURITY.md`, `docs/TENANCY.md`, `docs/
 
 ## Artifact protocol
 
-Every handoff must update or explicitly re-validate the relevant artifact:
+Every handoff must update or explicitly re-validate the relevant artifact and must write the transition status to `project/work-orders/state.json`:
 
 - API/backend changes: `project/modules/<module>/api.contract.md`
 - UI/frontend changes: `project/modules/<module>/ui.contract.md`
 - DTO/data changes: `project/modules/<module>/dto.md` and `project/modules/<module>/data-model.md`
 - QA changes: `project/modules/<module>/test-matrix.md`
-- Every transition: `project/modules/<module>/handoff.md` and this active work order
+- Every transition: `project/modules/<module>/handoff.md`, `project/work-orders/state.json`, and this mirror file
 
 ## Must read
 
@@ -199,6 +200,8 @@ QA/reviewer:
 
 ## State Transition DTO
 
+The DTO below is a mirror of the current transition. The state machine record in `project/work-orders/state.json` is authoritative.
+
 ```json
 {
   "schema": "agentic.factory.StateTransition.v1",
@@ -208,7 +211,7 @@ QA/reviewer:
   "contract_version": "0.1.0",
   "module": "TBD",
   "current_state": "PLANNED",
-  "next_state": "READY",
+  "next_state": "IN_PROGRESS",
   "payload": {
     "summary": "TBD",
     "changed_files": [],

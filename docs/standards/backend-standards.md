@@ -26,3 +26,17 @@ Required backend workflow:
 3. Consume shared DTOs/types from `packages/contracts/` where they exist.
 4. Update `api.contract.md`, `dto.md`, `data-model.md` and `handoff.md` when behavior changes.
 5. Run `node scripts/factory-check.mjs` before handoff.
+
+
+## Strict SoC and dependency boundaries
+
+No business logic or data structures should be duplicated outside of `packages/contracts/` when they are part of public communication between agents, backend, frontend or integrations.
+
+Backend modules must not import frontend code. Backend module-to-module communication must not rely on direct internal imports for public data contracts; extract shared public shapes to `packages/contracts/` and expose behavior through documented APIs/events.
+
+Before handoff, backend-impacting work must run:
+
+```bash
+node scripts/factory-check.mjs
+node scripts/check-dependencies.mjs
+```

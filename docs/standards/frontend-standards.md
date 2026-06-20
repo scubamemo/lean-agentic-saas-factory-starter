@@ -113,3 +113,17 @@ Required frontend workflow:
 3. Reuse existing components from `frontend/src/components/` before creating new components.
 4. Document reusable components in `frontend/src/components/COMPONENTS.md`.
 5. Run `node scripts/factory-check.mjs` before handoff.
+
+
+## Strict SoC and dependency boundaries
+
+No business logic or data structures should be duplicated outside of `packages/contracts/` when they are part of public communication between agents, backend, frontend or integrations.
+
+Frontend must not import backend code directly. Frontend must not import `packages/shared/` except explicitly UI-compatible utilities under `packages/shared/ui-safe/` or `packages/shared/src/ui-safe/`. All backend/frontend communication must use `packages/contracts/` or generated `packages/api-client/` outputs.
+
+Before handoff, frontend-impacting work must run:
+
+```bash
+node scripts/factory-check.mjs
+node scripts/check-dependencies.mjs
+```

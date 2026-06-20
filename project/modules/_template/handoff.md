@@ -6,7 +6,7 @@ Use this file for structured module handoffs. Human-readable notes are allowed, 
 
 PLANNED
 
-Allowed values: PLANNED, READY, CONTRACT_IN_PROGRESS, CONTRACT_READY, BACKEND_IN_PROGRESS, BACKEND_IMPLEMENTED, FRONTEND_IN_PROGRESS, FRONTEND_IMPLEMENTED, QA_IN_PROGRESS, REVIEW_IN_PROGRESS, REVISION_IN_PROGRESS, PASSED, DONE, BLOCKED
+Allowed values: PLANNED, READY, CONTRACT_IN_PROGRESS, CONTRACT_READY, BACKEND_IN_PROGRESS, BACKEND_IMPLEMENTED, FRONTEND_IN_PROGRESS, FRONTEND_IMPLEMENTED, QA_IN_PROGRESS, REVIEW_IN_PROGRESS, FAILED, PASSED, DONE, BLOCKED
 
 ## Current dependencies
 
@@ -46,7 +46,7 @@ TBD
   "contract_version": "0.1.0",
   "module": "<module-name>",
   "current_state": "PLANNED",
-  "next_state": "READY",
+  "next_state": "IN_PROGRESS",
   "payload": {
     "summary": "TBD",
     "changed_files": [],

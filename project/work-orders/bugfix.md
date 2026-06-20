@@ -20,7 +20,7 @@ backend-developer / frontend-developer / data-engineer / architect
 
 ## Status
 
-REVISION_IN_PROGRESS
+FAILED
 
 ## Failure summary
 
@@ -65,8 +65,8 @@ TBD
   "work_order_id": "WO-0001",
   "contract_version": "0.1.0",
   "module": "TBD",
-  "current_state": "QA_IN_PROGRESS",
-  "next_state": "REVISION_IN_PROGRESS",
+  "current_state": "QA_PENDING",
+  "next_state": "FAILED",
   "payload": {
     "summary": "TBD",
     "changed_files": [

@@ -34,3 +34,10 @@ packages/contracts/
 ## Duplication ban
 
 Backend and frontend modules must not duplicate business logic or public data models outside `packages/contracts/`. Public data models, DTOs, schemas, events and permission constants must be defined here or generated from contracts maintained here.
+
+
+## Dependency boundary enforcement
+
+All cross-domain communication between `backend/`, `frontend/` and generated modules must flow through this package or generated outputs in `packages/api-client/`.
+
+`frontend/` must not import `backend/` directly. `backend/` must not import `frontend/` directly. Backend module-to-module public data exchange must be represented as contracts here instead of direct internal imports.
