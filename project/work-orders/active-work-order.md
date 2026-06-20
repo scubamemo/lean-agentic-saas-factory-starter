@@ -6,15 +6,21 @@ WO-0001
 
 ## Task type
 
-planned
+docs-only
 
-Allowed values: docs-only, contract-only, backend-only, frontend-only, data-model, frontend-only, full-stack, bugfix, refactor, review, release
+Allowed values: docs-only, contract-only, backend-only, frontend-only, data-model, full-stack, bugfix, refactor, review, release
 
 ## Status
 
-planned
+PLANNED
 
 Allowed values: PLANNED, READY, CONTRACT_IN_PROGRESS, CONTRACT_READY, BACKEND_IN_PROGRESS, BACKEND_IMPLEMENTED, FRONTEND_IN_PROGRESS, FRONTEND_IMPLEMENTED, QA_IN_PROGRESS, REVIEW_IN_PROGRESS, REVISION_IN_PROGRESS, PASSED, DONE, BLOCKED
+
+## Development chain
+
+Plan -> Backend -> Frontend -> QA -> Code Reviewer
+
+QA approval is mandatory before merge or release.
 
 ## Context mode
 
@@ -50,6 +56,16 @@ No
 
 If yes, read the relevant parts of `docs/SECURITY.md`, `docs/TENANCY.md`, `docs/RBAC.md`, and route schema/data isolation work to Data Engineer.
 
+## Artifact protocol
+
+Every handoff must update or explicitly re-validate the relevant artifact:
+
+- API/backend changes: `project/modules/<module>/api.contract.md`
+- UI/frontend changes: `project/modules/<module>/ui.contract.md`
+- DTO/data changes: `project/modules/<module>/dto.md` and `project/modules/<module>/data-model.md`
+- QA changes: `project/modules/<module>/test-matrix.md`
+- Every transition: `project/modules/<module>/handoff.md` and this active work order
+
 ## Must read
 
 - START-HERE.md
@@ -74,6 +90,7 @@ Backend:
 
 Frontend:
 
+- docs/standards/frontend-standards.md
 - project/modules/<module>/ui.contract.md
 - project/modules/<module>/api.contract.md
 - project/modules/<module>/dto.md
@@ -85,6 +102,7 @@ Data Engineer:
 
 - project/modules/<module>/data-model.md
 - project/modules/<module>/dto.md
+- project/modules/<module>/api.contract.md
 - project/modules/<module>/permissions.md
 - project/modules/<module>/test-matrix.md
 - project/modules/<module>/handoff.md
@@ -113,9 +131,10 @@ QA/reviewer:
 - backend/prisma/schema.prisma only for Data Engineer work
 - backend/prisma/migrations/** only for Data Engineer work
 - frontend/src/app/** for frontend routes/pages
-- frontend/src/components/** for frontend components
+- frontend/src/components/** for reusable frontend components and documentation
 - frontend/src/lib/** for frontend shared UI/client work
 - frontend/test/** for frontend tests
+- project/work-orders/bugfix.md for QA/review failure routing
 
 ## Forbidden paths by default
 
@@ -126,6 +145,7 @@ QA/reviewer:
 - packages/contracts/** for Frontend Dev
 - factory standards unless this is a factory-maintenance work order
 - broad docs/ or project/ rewrites unless this is a docs/refactor work order
+- ad-hoc CSS or unapproved UI styling
 
 ## Required output
 
@@ -137,6 +157,7 @@ QA/reviewer:
 - Context updated: yes/no/not needed
 - Pre-write check: passed/failed/not applicable
 - Handoff updated
+- Active work order updated
 - Next owner
 - State Transition DTO
 
@@ -155,7 +176,10 @@ QA/reviewer:
   "payload": {
     "summary": "TBD",
     "changed_files": [],
-    "contracts_updated": [],
+    "contracts_updated": [
+      "api.contract.md",
+      "ui.contract.md"
+    ],
     "diff_refs": [],
     "checks_run": [],
     "blockers": [],

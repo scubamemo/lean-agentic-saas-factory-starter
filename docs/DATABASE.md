@@ -2,11 +2,11 @@
 
 ## Default Model
 
-Default SaaS model: tek shared DB + her tenant-owned tabloda `tenant_id`.
+Default SaaS model: single shared DB + `tenant_id` on every tenant-owned table. Premium/dedicated modes are supported by configuration, not by changing the default development model.
 
-## Required Common Tables
+## Recommended Common Tables
 
-- `tenants`
+- `tenants` — present in the starter Prisma schema
 - `users`
 - `roles`
 - `permissions`
@@ -41,3 +41,10 @@ Her feature contract'ında DB etkisi açıkça yazılır:
 - constraint
 - migration risk
 - rollback notu
+
+
+## Starter Prisma Baseline
+
+The starter keeps Prisma intentionally lean. `Tenant` is included as the platform anchor model with fields for shared/dedicated mode planning: `slug`, `status`, `planCode`, `dbMode`, `connectionRef`, `region`, `featuresJson`, `createdAt`, and `updatedAt`.
+
+Add `User`, `Role`, `Permission`, `AuditLog`, `TenantSetting`, and feature-specific tenant-owned entities only when the active work order and module contracts require them.

@@ -46,6 +46,17 @@ scripts/       Minimal validation/export helpers
 - No frontend/backend implementation cross-reading by default.
 
 
-## V13 lean cyclic workflow
+## Lean artifact-driven cyclic workflow
 
-This version keeps the lean v12 workflow but adds structured MCP-compatible DTO handoffs, directory RBAC guardrails, a Data Engineer role for Prisma/schema ownership, task readiness checks, module/work-order generators and cyclic QA/review feedback.
+This starter keeps a lean workflow and adds structured MCP-compatible DTO handoffs, directory RBAC guardrails, a Data Engineer role for Prisma/schema ownership, task readiness checks, module/work-order generators and cyclic QA/review feedback.
+
+
+## Artifact-driven loop
+
+The default development chain is:
+
+```text
+Plan -> Backend -> Frontend -> QA -> Code Reviewer
+```
+
+Every handoff must update the active work order, module `handoff.md`, State Transition DTO, and the relevant `api.contract.md` or `ui.contract.md` artifact. QA failures create `project/work-orders/bugfix.md` and route the task back to the original developer as `REVISION_IN_PROGRESS`.

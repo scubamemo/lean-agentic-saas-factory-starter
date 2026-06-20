@@ -6,6 +6,31 @@ Use this file for structured module handoffs. Human-readable notes are allowed, 
 
 PLANNED
 
+Allowed values: PLANNED, READY, CONTRACT_IN_PROGRESS, CONTRACT_READY, BACKEND_IN_PROGRESS, BACKEND_IMPLEMENTED, FRONTEND_IN_PROGRESS, FRONTEND_IMPLEMENTED, QA_IN_PROGRESS, REVIEW_IN_PROGRESS, REVISION_IN_PROGRESS, PASSED, DONE, BLOCKED
+
+## Current dependencies
+
+| Dependency | Type | Status | Notes |
+|---|---|---|---|
+| TBD | module/api/data/ui/external | TBD | TBD |
+
+## Next agent
+
+pm
+
+Allowed values: pm, architect, designer, data-engineer, backend-developer, frontend-developer, qa, code-reviewer
+
+## Artifact sync
+
+| Artifact | Status | Notes |
+|---|---|---|
+| api.contract.md | draft | Update/re-validate before backend handoff |
+| ui.contract.md | draft | Update/re-validate before frontend handoff |
+| dto.md | draft | Keep aligned with API/UI contracts |
+| data-model.md | draft | Data Engineer owns Prisma-impacting changes |
+| permissions.md | draft | Keep aligned with RBAC checks |
+| test-matrix.md | planned | QA verifies before done |
+
 ## Human summary
 
 TBD
@@ -25,7 +50,10 @@ TBD
   "payload": {
     "summary": "TBD",
     "changed_files": [],
-    "contracts_updated": [],
+    "contracts_updated": [
+      "api.contract.md",
+      "ui.contract.md"
+    ],
     "diff_refs": [],
     "checks_run": [],
     "blockers": [],
@@ -44,6 +72,12 @@ TBD
 ## Blockers
 
 - None
+
+## QA / review notes
+
+- No feature may be marked DONE until QA verifies against `test-matrix.md`.
+- QA and Code Reviewer must not fix implementation directly.
+- Failures must be routed through `project/work-orders/bugfix.md` and a State Transition DTO.
 
 ## Notes
 

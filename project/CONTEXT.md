@@ -41,10 +41,35 @@ TBD
 - TBD
 
 
-## V13 Lean Cyclic Additions
+## Structured handoff and cyclic workflow rules
 
 - Use structured State Transition DTOs for agent handoffs.
 - Follow `.agents/rules/guardrails.md` before writing files.
 - Use Data Engineer for Prisma schema, tenant isolation and destructive migration review.
 - Use cyclic feedback: QA/Reviewer report failures; original developer fixes.
 - Keep `project/CONTEXT.md` and module `context.md` updated when project or contract decisions change.
+
+
+## Artifact-driven autonomous loop
+
+The active work order is the source of truth. Agents use task-focused MCP-compatible DTO handoffs and load only the target module context/contracts.
+
+Default chain:
+
+```text
+Plan -> Backend -> Frontend -> QA -> Code Reviewer
+```
+
+Required artifacts:
+
+```text
+api.contract.md
+ui.contract.md
+dto.md
+data-model.md
+permissions.md
+test-matrix.md
+handoff.md
+```
+
+Frontend must follow the Tailwind/Shadcn-compatible Design System and may not create ad-hoc CSS.

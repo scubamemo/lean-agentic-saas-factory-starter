@@ -1,10 +1,10 @@
 {
   "name": "agentic-saas-factory-starter",
-  "version": "13.0.0-lean-cyclic",
+  "version": "15.0.0-lean-artifact-loop",
   "private": true,
   "packageManager": "pnpm@9.15.4",
   "scripts": {
-    "check": "node scripts/factory-check.mjs && node scripts/task-ready-check.mjs --allow-tbd",
+    "check": "pnpm check:template",
     "export:template": "node scripts/export-template.mjs . ../generated-project",
     "backend:dev": "pnpm --dir backend dev",
     "backend:typecheck": "pnpm --dir backend typecheck",
@@ -12,12 +12,15 @@
     "frontend:dev": "pnpm --dir frontend dev",
     "frontend:typecheck": "pnpm --dir frontend typecheck",
     "frontend:test": "pnpm --dir frontend test",
-    "check:factory": "node scripts/factory-check.mjs",
+    "check:factory": "node scripts/factory-check.mjs && node scripts/check-dto.mjs && node scripts/check-contract-artifacts.mjs",
     "check:task": "node scripts/task-ready-check.mjs",
-    "check:project": "pnpm check:factory && pnpm backend:typecheck && pnpm frontend:typecheck",
+    "check:project": "pnpm check:factory && pnpm check:task && pnpm --dir backend check && pnpm --dir frontend check",
     "new:module": "node scripts/new-module.mjs",
     "new:work-order": "node scripts/new-work-order.mjs",
     "backend:lint": "pnpm --dir backend lint",
-    "frontend:lint": "pnpm --dir frontend lint"
+    "frontend:lint": "pnpm --dir frontend lint",
+    "check:template": "pnpm check:factory && pnpm check:task --allow-tbd",
+    "check:dto": "node scripts/check-dto.mjs",
+    "check:contracts": "node scripts/check-contract-artifacts.mjs"
   }
 }

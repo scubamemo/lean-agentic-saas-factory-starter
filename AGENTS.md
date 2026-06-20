@@ -139,3 +139,28 @@ The `State Transition DTO` must follow `.agents/rules/mcp-communication.md`.
 If an agent changes behavior, API, data model, permissions, UI behavior or tests, update the module `handoff.md` before ending.
 
 The handoff must contain a valid structured JSON DTO, not only free-form markdown.
+
+
+## Artifact Protocol
+
+Agents must never communicate through free-text alone. Every handoff must include:
+
+```text
+project/work-orders/active-work-order.md update
+project/modules/<module>/handoff.md update
+State Transition DTO
+Relevant contract artifact update or re-validation
+```
+
+Relevant artifacts:
+
+```text
+api.contract.md for backend/API behavior
+dto.md for data transfer shapes
+data-model.md for persistence shape
+permissions.md for access rules
+ui.contract.md for frontend/UI behavior
+test-matrix.md for QA evidence
+```
+
+`api.contract.md` must contain OpenAPI 3.1 or JSON Schema definitions before integration work starts.

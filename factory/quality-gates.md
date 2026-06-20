@@ -36,10 +36,32 @@ Use these gates as a practical checklist, not bureaucracy.
 - Product behavior not specified by project/module docs.
 
 
-## V13 lightweight gates
+## Lightweight gates
 
 - Run `pnpm check:task` before implementation.
 - Run `pnpm check:project` before marking production-ready work as done.
 - Handoffs must include State Transition DTOs.
 - QA and Reviewer must not fix implementation failures; they route feedback DTOs back to the original developer.
 - Data model changes touching Prisma must be owned or approved by Data Engineer.
+
+
+## Artifact and QA loop gate
+
+Before implementation:
+
+```text
+pnpm check:factory
+pnpm check:task
+```
+
+Before marking a feature done:
+
+```text
+api.contract.md or ui.contract.md updated/re-validated
+test-matrix.md verified by QA
+handoff.md current status is PASSED or DONE
+active-work-order.md status is PASSED or DONE
+State Transition DTO exists and routes to code-reviewer or PM
+```
+
+No merge/release without QA pass and Code Reviewer acceptance.
