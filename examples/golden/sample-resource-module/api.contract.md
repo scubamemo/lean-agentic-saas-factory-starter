@@ -2,6 +2,14 @@
 
 This is the canonical golden example for module API contracts. Real modules must provide a strict OpenAPI 3.1 contract or JSON Schema definitions before implementation starts.
 
+## Primary JSON Spec-Kit artifact
+
+```text
+packages/contracts/specs/sample-resource.spec.json
+```
+
+The markdown below is a human-readable mirror of the standardized JSON spec.
+
 ## OpenAPI 3.1 specification
 
 ```yaml

@@ -1,5 +1,5 @@
 {
-  "schema": "agentic.factory.WorkOrderState.v3",
+  "schema": "agentic.factory.WorkOrderState.v4",
   "work_order_id": "WO-0001",
   "module": "TBD",
   "task_type": "docs-only",
@@ -21,6 +21,11 @@
       "FAILED"
     ],
     "QA_PENDING": [
+      "APPROVED",
+      "COMPLETED",
+      "FAILED"
+    ],
+    "APPROVED": [
       "COMPLETED",
       "FAILED"
     ],
@@ -43,7 +48,10 @@
     "template_cache_valid": false,
     "test_matrix_criteria_met": false,
     "qa_passed": false,
-    "review_passed": false
+    "review_passed": false,
+    "spec_kit_contracts_valid": false,
+    "security_scan_passed": false,
+    "trace_logged": false
   },
   "artifacts": {
     "api_contract": "project/modules/TBD/api.contract.md",
@@ -63,7 +71,8 @@
     "state.json is the only workflow source of truth.",
     "active-work-order.md is a human-readable mirror only.",
     "Agents must use history-summary.json for historical context instead of reading completed work-order markdown or old handoff logs.",
-    "Agents must write only their assigned agent_payloads key when reporting phase deltas."
+    "Agents must write only their assigned agent_payloads key when reporting phase deltas.",
+    "HITL gate: if approval_required=true, execution pauses until a human sets status=APPROVED or clears approval_required with an approval note."
   ],
   "history_summary": "project/work-orders/history-summary.json",
   "template_cache": "project/work-orders/template-structure-cache.json",
@@ -124,5 +133,13 @@
       "updated_by": "system",
       "changed_artifacts": []
     }
+  },
+  "approval_required": false,
+  "approved_by": null,
+  "approval_notes": [],
+  "observability": {
+    "trace_dir": "project/work-orders/traces",
+    "trace_required_before_completion": true,
+    "trace_format": "agentic.factory.DecisionTrace.v1"
   }
 }

@@ -1,0 +1,10 @@
+---
+description: Agentic SaaS Factory canonical rules
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+Read `AGENTS.md` first. Canonical rules live in `.agents/**`, `docs/constitution.md`, and `project/work-orders/state.json`.
+
+Do not perform full repo scans. Run deterministic scripts before manual reasoning.

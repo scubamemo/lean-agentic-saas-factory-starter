@@ -1,6 +1,6 @@
 {
   "name": "agentic-saas-factory-starter",
-  "version": "16.0.0-architectural-perfection",
+  "version": "19.0.0-tool-adapter-constitution",
   "private": true,
   "packageManager": "pnpm@9.15.4",
   "scripts": {
@@ -12,7 +12,7 @@
     "frontend:dev": "pnpm --dir frontend dev",
     "frontend:typecheck": "pnpm --dir frontend typecheck",
     "frontend:test": "pnpm --dir frontend test",
-    "check:factory": "node scripts/factory-check.mjs && node scripts/check-dto.mjs && node scripts/check-contract-artifacts.mjs && node scripts/check-dependencies.mjs && node scripts/check-template-cache.mjs",
+    "check:factory": "node scripts/factory-check.mjs && node scripts/check-dto.mjs && node scripts/check-contract-artifacts.mjs && node scripts/check-dependencies.mjs && node scripts/check-template-cache.mjs && node scripts/check-quality-gates.mjs && node scripts/check-spec-kit-contracts.mjs && node scripts/security-scanner.mjs && node scripts/check-constitution.mjs && node scripts/check-skill-metadata.mjs && node scripts/check-agent-handoff.mjs && node scripts/check-untrusted-instructions.mjs",
     "check:task": "node scripts/task-ready-check.mjs",
     "check:project": "pnpm check:factory && pnpm check:task && pnpm --dir backend check && pnpm --dir frontend check",
     "new:module": "node scripts/new-module.mjs",
@@ -25,7 +25,16 @@
     "check:boundaries": "node scripts/check-dependencies.mjs",
     "check:dependencies": "node scripts/check-dependencies.mjs",
     "check:template-cache": "node scripts/check-template-cache.mjs",
-    "check:token-context": "node scripts/check-template-cache.mjs && node scripts/task-ready-check.mjs --allow-tbd"
+    "check:token-context": "node scripts/check-template-cache.mjs && node scripts/task-ready-check.mjs --allow-tbd",
+    "check:quality": "node scripts/check-quality-gates.mjs",
+    "check:specs": "node scripts/check-spec-kit-contracts.mjs",
+    "check:security": "node scripts/security-scanner.mjs",
+    "trace": "node scripts/trace-logger.mjs",
+    "check:constitution": "node scripts/check-constitution.mjs",
+    "check:skill-metadata": "node scripts/check-skill-metadata.mjs",
+    "check:agent-handoff": "node scripts/check-agent-handoff.mjs",
+    "check:untrusted": "node scripts/check-untrusted-instructions.mjs",
+    "export:adapter": "node scripts/export-tool-adapter.mjs"
   },
   "devDependencies": {
     "dependency-cruiser": "^16.10.4"

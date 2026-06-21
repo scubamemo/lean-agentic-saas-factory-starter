@@ -6,3 +6,7 @@
  * public data structures in backend or frontend modules.
  */
 export const CONTRACTS_PACKAGE_VERSION = '0.1.0';
+
+
+export const SPEC_KIT_SPEC_SCHEMA = 'agentic.factory.SpecKitModuleSpec.v1';
+export const SPEC_KIT_SPECS_DIR = 'packages/contracts/specs';

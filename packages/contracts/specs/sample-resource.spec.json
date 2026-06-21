@@ -1,0 +1,265 @@
+{
+  "schema": "agentic.factory.SpecKitModuleSpec.v1",
+  "module": "sample-resource",
+  "status": "contract-ready",
+  "spec": {
+    "summary": "Manage sample resources through a contract-first API and UI.",
+    "user_stories": [
+      "As an authorized user, I can list sample resources."
+    ],
+    "acceptance_criteria": [
+      "Listing returns a paginated response."
+    ],
+    "non_goals": [
+      "No domain-specific assumptions."
+    ]
+  },
+  "plan": {
+    "architecture": "Contract-first module with backend/frontend communication through packages/contracts.",
+    "quality_gates": [
+      "factory-check",
+      "contract-artifacts",
+      "dto",
+      "dependencies",
+      "security-scanner"
+    ],
+    "phase": "golden-example"
+  },
+  "data_model": {
+    "entities": [
+      {
+        "name": "SampleResource",
+        "tenant_owned": true,
+        "fields": [
+          "id",
+          "name",
+          "tenantId",
+          "createdAt",
+          "updatedAt"
+        ]
+      }
+    ],
+    "tenant_isolation": "Tenant-owned records require tenant context and tenant-aware constraints."
+  },
+  "contracts": {
+    "openapi": {
+      "openapi": "3.1.0",
+      "info": {
+        "title": "Sample Resource API",
+        "version": "0.1.0"
+      },
+      "paths": {
+        "/api/sample-resources": {
+          "get": {
+            "summary": "List sample resources",
+            "operationId": "listSampleResources",
+            "tags": [
+              "sample-resources"
+            ],
+            "responses": {
+              "200": {
+                "description": "Paginated result"
+              },
+              "401": {
+                "description": "Unauthorized"
+              },
+              "403": {
+                "description": "Forbidden"
+              }
+            }
+          },
+          "post": {
+            "summary": "Create sample resource",
+            "operationId": "createSampleResource",
+            "tags": [
+              "sample-resources"
+            ],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CreateSampleResourceRequest"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "201": {
+                "description": "Created"
+              },
+              "400": {
+                "description": "Validation error"
+              },
+              "401": {
+                "description": "Unauthorized"
+              },
+              "403": {
+                "description": "Forbidden"
+              }
+            }
+          }
+        }
+      },
+      "components": {
+        "schemas": {
+          "SampleResourceDto": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "name",
+              "createdAt",
+              "updatedAt"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "CreateSampleResourceRequest": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "SampleResourceListResponse": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "items",
+              "page",
+              "pageSize",
+              "total"
+            ],
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SampleResourceDto"
+                }
+              },
+              "page": {
+                "type": "integer"
+              },
+              "pageSize": {
+                "type": "integer"
+              },
+              "total": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "SampleResourceDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreateSampleResourceRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "SampleResourceListResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "total"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SampleResourceDto"
+            }
+          },
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "permissions": [
+      "sample.resource.read",
+      "sample.resource.create"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "T001",
+      "title": "TBD: implement contract-compliant behavior",
+      "parallel": false,
+      "owner": "backend-developer"
+    }
+  ],
+  "quickstart_checks": [
+    "Run node scripts/factory-check.mjs",
+    "Run node scripts/check-contract-artifacts.mjs",
+    "Run node scripts/check-dependencies.mjs"
+  ],
+  "validation": {
+    "contract_source_of_truth": "packages/contracts/specs/sample-resource.spec.json",
+    "markdown_mirror": "project/modules/sample-resource/api.contract.md"
+  }
+}

@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agentic.factory.AgentHandoff.v1",
+  "title": "Agent Handoff DTO",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "source_agent",
+    "target_agent",
+    "work_order_id",
+    "contract_version",
+    "module",
+    "current_state",
+    "next_state",
+    "payload",
+    "context_budget"
+  ],
+  "properties": {
+    "schema": {
+      "const": "agentic.factory.StateTransition.v1"
+    },
+    "source_agent": {
+      "type": "string",
+      "enum": [
+        "pm",
+        "architect",
+        "designer",
+        "data-engineer",
+        "backend-developer",
+        "frontend-developer",
+        "qa",
+        "code-reviewer"
+      ]
+    },
+    "target_agent": {
+      "type": "string",
+      "enum": [
+        "pm",
+        "architect",
+        "designer",
+        "data-engineer",
+        "backend-developer",
+        "frontend-developer",
+        "qa",
+        "code-reviewer"
+      ]
+    },
+    "work_order_id": {
+      "type": "string",
+      "pattern": "^WO-[0-9A-Za-z._-]+$"
+    },
+    "contract_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "module": {
+      "type": "string",
+      "minLength": 1
+    },
+    "current_state": {
+      "type": "string",
+      "enum": [
+        "PLANNED",
+        "IN_PROGRESS",
+        "VALIDATION_REQUIRED",
+        "QA_PENDING",
+        "APPROVED",
+        "COMPLETED",
+        "FAILED"
+      ]
+    },
+    "next_state": {
+      "type": "string",
+      "enum": [
+        "PLANNED",
+        "IN_PROGRESS",
+        "VALIDATION_REQUIRED",
+        "QA_PENDING",
+        "APPROVED",
+        "COMPLETED",
+        "FAILED"
+      ]
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "summary",
+        "changed_files",
+        "contracts_updated",
+        "diff_refs",
+        "checks_run",
+        "blockers",
+        "feedback",
+        "next_actions"
+      ],
+      "properties": {
+        "summary": {
+          "type": "string"
+        },
+        "changed_files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "contracts_updated": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "diff_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "checks_run": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "blockers": {
+          "type": "array"
+        },
+        "feedback": {
+          "type": "array"
+        },
+        "next_actions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "context_budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "files_read_count",
+        "history_pruned",
+        "full_repo_scan"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        "files_read_count": {
+          "type": "number",
+          "minimum": 0
+        },
+        "history_pruned": {
+          "type": "boolean",
+          "const": true
+        },
+        "full_repo_scan": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    }
+  }
+}

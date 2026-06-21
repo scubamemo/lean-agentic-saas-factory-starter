@@ -127,3 +127,44 @@ Before handoff, frontend-impacting work must run:
 node scripts/factory-check.mjs
 node scripts/check-dependencies.mjs
 ```
+
+
+## Frontend engineering quality bar
+
+Frontend code must satisfy:
+
+```text
+docs/standards/software-craftsmanship.md
+docs/standards/frontend-engineering-quality.md
+docs/standards/testing-quality-bar.md
+```
+
+Required frontend quality rules:
+
+- Page components compose behavior; reusable components avoid module-specific business rules.
+- Component props must be typed, minimal and contract-aligned.
+- Server/API state should use the project API/query layer; do not duplicate DTO shapes.
+- Local UI state is preferred unless state is cross-page/session/global.
+- Loading, empty, error, forbidden, success and validation states must match `ui.contract.md`.
+- Accessibility basics are mandatory for interactive UI.
+- Existing components must be reused or refactored before new components are created.
+- Every new or refactored reusable component must update `frontend/src/components/COMPONENTS.md`.
+
+Before frontend handoff, also run:
+
+```bash
+node scripts/check-quality-gates.mjs
+```
+
+
+## Standardized JSON contract consumption
+
+Frontend implementation must consume public data structures from `packages/contracts/` or generated `packages/api-client/` outputs derived from `packages/contracts/specs/*.spec.json`.
+
+Frontend must not infer DTOs from backend implementation and must not import backend files directly. Before frontend handoff:
+
+```bash
+node scripts/check-spec-kit-contracts.mjs
+node scripts/check-dependencies.mjs
+node scripts/security-scanner.mjs
+```

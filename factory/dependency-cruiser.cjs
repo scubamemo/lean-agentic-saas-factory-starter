@@ -28,11 +28,18 @@ module.exports = {
       to: { path: '^packages/shared/(?!ui-safe/|src/ui-safe/)' }
     },
     {
-      name: 'no-cross-app-module-imports-without-contracts',
-      comment: 'Cross-boundary communication must be represented through packages/contracts or packages/api-client, not direct app imports.',
+      name: 'no-backend-module-to-other-backend-module',
+      comment: 'Backend module-to-module communication must be represented through packages/contracts or a public app boundary, not direct internal imports.',
       severity: 'error',
-      from: { path: '^(backend|frontend)/' },
-      to: { path: '^(backend|frontend)/', pathNot: '^(backend/|frontend/)' }
+      from: { path: '^backend/src/modules/([^/]+)/' },
+      to: { path: '^backend/src/modules/(?!$1/)' }
+    },
+    {
+      name: 'no-frontend-domain-to-backend-domain',
+      comment: 'Frontend/backend communication must go through packages/contracts or packages/api-client.',
+      severity: 'error',
+      from: { path: '^frontend/' },
+      to: { path: '^(backend/|backend/src/modules/)' }
     }
   ],
   options: {

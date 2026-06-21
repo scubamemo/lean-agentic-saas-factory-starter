@@ -262,3 +262,10 @@ The DTO below is a mirror of the current transition. The state machine record in
   }
 }
 ```
+
+
+## HITL / Trace mirror
+
+- Primary HITL flag: `project/work-orders/state.json.approval_required`.
+- If approval is required, only a human may set `state.json.status` to `APPROVED` or clear the gate.
+- Decision traces are written with `scripts/trace-logger.mjs` under `project/work-orders/traces/`.

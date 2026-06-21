@@ -41,3 +41,21 @@ Backend and frontend modules must not duplicate business logic or public data mo
 All cross-domain communication between `backend/`, `frontend/` and generated modules must flow through this package or generated outputs in `packages/api-client/`.
 
 `frontend/` must not import `backend/` directly. `backend/` must not import `frontend/` directly. Backend module-to-module public data exchange must be represented as contracts here instead of direct internal imports.
+
+
+## Spec-Kit JSON contracts
+
+`packages/contracts/specs/*.spec.json` is the primary executable contract format. Module markdown files under `project/modules/<module>/` are human-readable mirrors only.
+
+Each spec follows `packages/contracts/spec-kit.module.schema.json` and contains the spec-driven development package used by the factory:
+
+```text
+spec        what/why, user stories, acceptance criteria and non-goals
+plan        implementation approach and quality gates
+data_model  entities and tenant isolation expectations
+contracts   OpenAPI 3.1, JSON schemas and permissions
+tasks       implementation task slices
+quickstart_checks validation commands
+```
+
+This mirrors the Spec-Kit style of moving from constitution/principles to specification, plan, contracts and executable tasks while keeping the JSON contract machine-verifiable.

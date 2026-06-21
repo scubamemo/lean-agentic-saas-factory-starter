@@ -29,7 +29,7 @@ function jsonBlocks(text) {
   return blocks;
 }
 
-const allowedStates = new Set(['PLANNED','IN_PROGRESS','VALIDATION_REQUIRED','QA_PENDING','COMPLETED','FAILED']);
+const allowedStates = new Set(['PLANNED','IN_PROGRESS','VALIDATION_REQUIRED','QA_PENDING','APPROVED','COMPLETED','FAILED']);
 const allowedAgents = new Set(['pm','architect','designer','data-engineer','backend-developer','frontend-developer','qa','code-reviewer']);
 
 function validateDto(dto, rel, { expectedWorkOrderId, expectedModule } = {}) {

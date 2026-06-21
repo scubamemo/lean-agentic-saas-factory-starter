@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 
 const root = process.cwd();
 let failed = false;
@@ -92,7 +93,7 @@ function scanDirectImports() {
 const requiredFiles = [
   'START-HERE.md','AGENTS.md','project/PROJECT.md','project/UI.md','project/MODULES.md','project/CONTEXT.md','project/work-orders/state.json','project/work-orders/state.schema.json','project/work-orders/history-summary.json','project/work-orders/template-structure-cache.json','project/work-orders/active-work-order.md',
   'project/modules/_template/MODULE.md','project/modules/_template/context.md','project/modules/_template/api.contract.md','project/modules/_template/dto.md','project/modules/_template/data-model.md','project/modules/_template/permissions.md','project/modules/_template/ui.contract.md','project/modules/_template/test-matrix.md','project/modules/_template/handoff.md',
-  '.agents/rules/global.md','.agents/rules/context-budget.md','.agents/rules/guardrails.md','.agents/rules/mcp-communication.md','.agents/routing.md','.agents/workflows/cyclic-development.md','.agents/skills/data-engineer/SKILL.md','factory/quality-gates.md','docs/patterns/common-feature-patterns.md','examples/golden/sample-resource-module/MODULE.md','examples/golden/sample-resource-module/api.contract.md','examples/golden/sample-resource-module/ui.contract.md','examples/golden/sample-resource-module/test-matrix.md','examples/golden/sample-resource-module/handoff.md','scripts/task-ready-check.mjs','scripts/check-dto.mjs','scripts/check-contract-artifacts.mjs','scripts/check-dependencies.mjs','scripts/check-template-cache.mjs','scripts/new-module.mjs','scripts/new-work-order.mjs','project/work-orders/bugfix.md','frontend/src/components/COMPONENTS.md','packages/contracts/README.md','packages/contracts/src/index.ts','factory/dependency-cruiser.cjs','.dependency-cruiser.cjs'
+  '.agents/rules/global.md','.agents/rules/context-budget.md','.agents/rules/guardrails.md','.agents/rules/mcp-communication.md','.agents/routing.md','.agents/workflows/cyclic-development.md','.agents/skills/data-engineer/SKILL.md','factory/quality-gates.md','docs/patterns/common-feature-patterns.md','examples/golden/sample-resource-module/MODULE.md','examples/golden/sample-resource-module/api.contract.md','examples/golden/sample-resource-module/ui.contract.md','examples/golden/sample-resource-module/test-matrix.md','examples/golden/sample-resource-module/handoff.md','scripts/task-ready-check.mjs','scripts/check-dto.mjs','scripts/check-contract-artifacts.mjs','scripts/check-dependencies.mjs','scripts/check-template-cache.mjs','scripts/check-quality-gates.mjs','scripts/check-spec-kit-contracts.mjs','scripts/trace-logger.mjs','scripts/security-scanner.mjs','scripts/new-module.mjs','scripts/new-work-order.mjs','project/work-orders/bugfix.md','frontend/src/components/COMPONENTS.md','packages/contracts/README.md','packages/contracts/src/index.ts','packages/contracts/spec-kit.module.schema.json','packages/contracts/specs/_template.spec.json','packages/contracts/specs/sample-resource.spec.json','factory/dependency-cruiser.cjs','.dependency-cruiser.cjs','docs/standards/software-craftsmanship.md','docs/standards/backend-engineering-quality.md','docs/standards/frontend-engineering-quality.md','docs/standards/testing-quality-bar.md','docs/standards/code-review-quality-bar.md'
 ];
 for (const rel of requiredFiles) if (!exists(rel)) fail(`Missing required file: ${rel}`);
 if (!failed) ok('required files are present');
@@ -109,7 +110,7 @@ try {
 
 try {
   const state = JSON.parse(read('project/work-orders/state.json'));
-  if (state.schema !== 'agentic.factory.WorkOrderState.v3') fail('state.json must use agentic.factory.WorkOrderState.v3');
+  if (state.schema !== 'agentic.factory.WorkOrderState.v4') fail('state.json must use agentic.factory.WorkOrderState.v4');
   if (!state.last_updated_by) fail('state.json must include last_updated_by');
   if (!Array.isArray(state.validation_errors)) fail('state.json must include validation_errors array');
   if (state.mcp?.source_of_truth !== 'project/work-orders/state.json') fail('state.json must declare itself as MCP source of truth');
@@ -123,7 +124,11 @@ try {
   if (!state.allowed_transitions?.PLANNED?.includes('IN_PROGRESS')) fail('state.json must allow PLANNED -> IN_PROGRESS');
   if (!state.allowed_transitions?.IN_PROGRESS?.includes('VALIDATION_REQUIRED')) fail('state.json must allow IN_PROGRESS -> VALIDATION_REQUIRED');
   if (!state.allowed_transitions?.VALIDATION_REQUIRED?.includes('QA_PENDING') || !state.allowed_transitions?.VALIDATION_REQUIRED?.includes('FAILED')) fail('state.json must allow VALIDATION_REQUIRED -> QA_PENDING / FAILED');
-  if (!state.allowed_transitions?.QA_PENDING?.includes('FAILED') || !state.allowed_transitions?.QA_PENDING?.includes('COMPLETED')) fail('state.json must allow QA_PENDING -> FAILED / COMPLETED');
+  if (!state.allowed_transitions?.QA_PENDING?.includes('FAILED') || !state.allowed_transitions?.QA_PENDING?.includes('COMPLETED') || !state.allowed_transitions?.QA_PENDING?.includes('APPROVED')) fail('state.json must allow QA_PENDING -> APPROVED / FAILED / COMPLETED');
+  if (!state.allowed_transitions?.APPROVED?.includes('COMPLETED')) fail('state.json must allow APPROVED -> COMPLETED');
+  if (typeof state.approval_required !== 'boolean') fail('state.json must include approval_required boolean');
+  if (state.observability?.trace_required_before_completion !== true) fail('state.json must require trace logging before completion');
+  for (const gate of ['spec_kit_contracts_valid','security_scan_passed','trace_logged']) if (typeof state.quality_gates?.[gate] !== 'boolean') fail(`state.json must include quality_gates.${gate}`);
   if (!failed) ok('work-order state.json is structurally valid');
 } catch (error) { fail(`project/work-orders/state.json is invalid JSON: ${error.message}`); }
 
@@ -314,6 +319,66 @@ const contextBudget = read('.agents/rules/context-budget.md');
 for (const phrase of ['Lazy-loading context','history-summary.json','never read historical handoff.md','node scripts/check-template-cache.mjs']) {
   if (!contextBudget.includes(phrase)) fail(`context-budget.md missing lazy context phrase: ${phrase}`);
 }
+
+
+
+const qualityStandards = [
+  ['docs/standards/software-craftsmanship.md', ['SOLID','DRY','KISS','YAGNI','Pattern selection rules']],
+  ['docs/standards/backend-engineering-quality.md', ['Controller / route','Service / use case','tenant context','Backend testing expectations']],
+  ['docs/standards/frontend-engineering-quality.md', ['Design system enforcement','Component architecture','Accessibility bar','Frontend testing expectations']],
+  ['docs/standards/testing-quality-bar.md', ['test-matrix.md','happy path','tenant isolation','QA failure routing']],
+  ['docs/standards/code-review-quality-bar.md', ['Craftsmanship review rubric','Blocking review criteria','Overengineering detection']]
+];
+for (const [rel, phrases] of qualityStandards) {
+  const text = read(rel);
+  for (const phrase of phrases) if (!text.includes(phrase)) fail(`${rel} missing engineering quality phrase: ${phrase}`);
+}
+for (const skill of walk(path.join(root, '.agents/skills')).filter(f => f.endsWith('SKILL.md'))) {
+  const rel = normalize(path.relative(root, skill));
+  const text = fs.readFileSync(skill, 'utf8');
+  if (!text.includes('Script-first execution rule')) fail(`${rel} missing script-first rule`);
+  if (!text.includes('Deterministic state and strict gatekeeping')) fail(`${rel} missing strict gatekeeping rule`);
+}
+if (!read('docs/standards/lean-agentic-development.md').includes('Engineering excellence with lazy standards')) fail('lean-agentic-development.md missing lazy engineering excellence section');
+if (!failed) ok('engineering excellence standards and skill gates are present');
+
+
+function runBlockingScript(rel) {
+  const result = spawnSync(process.execPath, [rel], { cwd: root, encoding: 'utf8' });
+  if (result.status === 0) {
+    ok(`${rel} passed`);
+  } else {
+    const output = `${result.stdout ?? ''}\n${result.stderr ?? ''}`.trim();
+    fail(`${rel} failed${output ? `:\n${output}` : ''}`);
+  }
+}
+
+runBlockingScript('scripts/check-spec-kit-contracts.mjs');
+runBlockingScript('scripts/security-scanner.mjs');
+
+
+for (const rel of [
+  'docs/constitution.md',
+  'project/work-orders/constitution-cache.json',
+  'docs/standards/prompt-injection-safety.md',
+  '.agents/rules/untrusted-input.md',
+  '.agents/rules/hook-policy.md',
+  'packages/contracts/agent-handoff.schema.json',
+  'scripts/check-constitution.mjs',
+  'scripts/check-skill-metadata.mjs',
+  'scripts/check-agent-handoff.mjs',
+  'scripts/check-untrusted-instructions.mjs',
+  'scripts/export-tool-adapter.mjs',
+  'tool-adapters/antigravity/README.md',
+  'tool-adapters/claude-code/CLAUDE.md',
+  'tool-adapters/cursor/.cursor/rules/agentic-factory.mdc',
+  'tool-adapters/cline/.clinerules/agentic-factory.md',
+  'tool-adapters/windsurf/.windsurf/rules/agentic-factory.md',
+  'tool-adapters/copilot/.github/copilot-instructions.md'
+]) {
+  if (!exists(rel)) fail(`tool-adapter/constitution roadmap file missing: ${rel}`);
+}
+if (!failed) ok('constitution, hook policy, handoff schema, untrusted-input safety and tool adapters are present');
 
 if (failed) process.exit(1);
 console.log('OK: token-optimized architectural factory validator passed');

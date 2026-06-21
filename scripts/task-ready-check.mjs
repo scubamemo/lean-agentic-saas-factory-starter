@@ -5,14 +5,15 @@ const root = process.cwd();
 const allowTbd = process.argv.includes('--allow-tbd');
 let failed = false;
 
-const STATUS = ['PLANNED', 'IN_PROGRESS', 'VALIDATION_REQUIRED', 'QA_PENDING', 'COMPLETED', 'FAILED'];
+const STATUS = ['PLANNED', 'IN_PROGRESS', 'VALIDATION_REQUIRED', 'QA_PENDING', 'APPROVED', 'COMPLETED', 'FAILED'];
 const TASK_TYPES = ['docs-only', 'contract-only', 'backend-only', 'frontend-only', 'data-model', 'full-stack', 'bugfix', 'refactor', 'review', 'release'];
 const AGENTS = ['pm','architect','designer','data-engineer','backend-developer','frontend-developer','qa','code-reviewer'];
 const EXPECTED_TRANSITIONS = {
   PLANNED: ['IN_PROGRESS'],
   IN_PROGRESS: ['VALIDATION_REQUIRED', 'FAILED'],
   VALIDATION_REQUIRED: ['QA_PENDING', 'FAILED'],
-  QA_PENDING: ['COMPLETED', 'FAILED'],
+  QA_PENDING: ['APPROVED', 'COMPLETED', 'FAILED'],
+  APPROVED: ['COMPLETED', 'FAILED'],
   FAILED: ['IN_PROGRESS'],
   COMPLETED: []
 };
@@ -51,9 +52,9 @@ function shallowSameArray(a, b) {
   return Array.isArray(a) && Array.isArray(b) && a.length === b.length && a.every((x, i) => x === b[i]);
 }
 function validateStateSchema(state) {
-  const required = ['schema', 'work_order_id', 'module', 'task_type', 'status', 'last_updated_by', 'validation_errors', 'owner', 'next_agent', 'allowed_transitions', 'quality_gates', 'artifacts', 'mcp', 'history_summary', 'template_cache', 'delta_policy', 'agent_payloads'];
+  const required = ['schema', 'work_order_id', 'module', 'task_type', 'status', 'last_updated_by', 'validation_errors', 'owner', 'next_agent', 'allowed_transitions', 'quality_gates', 'artifacts', 'mcp', 'history_summary', 'template_cache', 'delta_policy', 'agent_payloads', 'approval_required', 'observability'];
   for (const key of required) if (!(key in state)) fail(`state.json missing required key: ${key}`);
-  if (state.schema !== 'agentic.factory.WorkOrderState.v3') fail(`Invalid state schema: ${state.schema}; expected agentic.factory.WorkOrderState.v3`);
+  if (state.schema !== 'agentic.factory.WorkOrderState.v4') fail(`Invalid state schema: ${state.schema}; expected agentic.factory.WorkOrderState.v4`);
   if (!/^WO-[0-9A-Za-z._-]+$/.test(state.work_order_id ?? '')) fail('state.json work_order_id must match WO-*');
   if (!TASK_TYPES.includes(state.task_type)) fail(`Invalid state task_type: ${state.task_type}`);
   if (!STATUS.includes(state.status)) fail(`Invalid state status: ${state.status}`);
@@ -109,6 +110,7 @@ if (cache) {
 
 const transition = state.requested_transition;
 if (transition) {
+  if (state.approval_required === true && transition.to !== 'APPROVED' && state.status !== 'APPROVED') fail('HITL pause: requested transition is blocked until human approval sets status=APPROVED');
   if (!STATUS.includes(transition.from) || !STATUS.includes(transition.to)) fail(`requested_transition must use valid statuses: ${transition.from} -> ${transition.to}`);
   if (transition.from !== state.status) fail(`requested_transition.from (${transition.from}) must match current status (${state.status})`);
   const allowed = state.allowed_transitions?.[transition.from] ?? [];
@@ -150,9 +152,13 @@ if (state.status === 'FAILED' && state.validation_errors.length === 0) {
 }
 if (state.status === 'COMPLETED') {
   if (state.validation_errors.length > 0) fail('COMPLETED requires validation_errors=[]');
-  for (const gate of ['qa_passed','review_passed','factory_check_passed','dependency_check_passed','contract_artifacts_valid','dto_check_passed','template_cache_valid','test_matrix_criteria_met']) {
+  for (const gate of ['qa_passed','review_passed','factory_check_passed','dependency_check_passed','contract_artifacts_valid','dto_check_passed','template_cache_valid','test_matrix_criteria_met','spec_kit_contracts_valid','security_scan_passed','trace_logged']) {
     if (state.quality_gates?.[gate] !== true) fail(`COMPLETED requires quality_gates.${gate}=true`);
   }
+}
+if (state.status === 'COMPLETED' || transition?.to === 'COMPLETED') {
+  const traceRel = `project/work-orders/traces/${state.work_order_id}.trace.jsonl`;
+  if (!exists(traceRel)) fail(`COMPLETED requires decision trace file: ${traceRel}`);
 }
 
 const wo = read('project/work-orders/active-work-order.md');

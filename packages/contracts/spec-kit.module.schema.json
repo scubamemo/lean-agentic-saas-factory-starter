@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agentic.factory.SpecKitModuleSpec.v1",
+  "title": "Agentic Spec-Kit Module Specification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "module",
+    "status",
+    "spec",
+    "plan",
+    "data_model",
+    "contracts",
+    "tasks",
+    "quickstart_checks",
+    "validation"
+  ],
+  "properties": {
+    "schema": {
+      "const": "agentic.factory.SpecKitModuleSpec.v1"
+    },
+    "module": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "contract-ready",
+        "implementation-ready",
+        "implemented",
+        "validated"
+      ]
+    },
+    "spec": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "summary",
+        "user_stories",
+        "acceptance_criteria",
+        "non_goals"
+      ],
+      "properties": {
+        "summary": {
+          "type": "string"
+        },
+        "user_stories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "acceptance_criteria": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "non_goals": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "plan": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "data_model": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "entities"
+      ]
+    },
+    "contracts": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "openapi",
+        "schemas",
+        "permissions"
+      ],
+      "properties": {
+        "openapi": {
+          "type": "object",
+          "required": [
+            "openapi",
+            "info",
+            "paths"
+          ]
+        },
+        "schemas": {
+          "type": "object"
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "quickstart_checks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

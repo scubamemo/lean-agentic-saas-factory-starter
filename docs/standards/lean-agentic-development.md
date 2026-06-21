@@ -133,3 +133,34 @@ The workflow is blocked if any command fails.
 - Running every agent for every task.
 - Creating new sidecar files when `state.json`, `history-summary.json`, `handoff.md`, `context.md` or a contract can carry the information.
 - Reading historical completed markdown when the rolling summary exists.
+
+
+## Engineering excellence with lazy standards
+
+Do not read every engineering standard by default. Use the script-first sequence first. If the work order or a failing script names engineering risk, then read only the relevant standard:
+
+```text
+software-craftsmanship.md          general SOLID/DRY/KISS/YAGNI and pattern rules
+backend-engineering-quality.md     backend layering, tenancy, transactions, data access
+frontend-engineering-quality.md    frontend components, state, accessibility, design system
+testing-quality-bar.md             QA coverage and evidence rules
+code-review-quality-bar.md         final review rubric
+```
+
+Agents must apply these quality bars before handoff, but they should lazy-load only the standards relevant to their role and the failing check.
+
+Before handoff or completion, run:
+
+```bash
+node scripts/check-quality-gates.mjs
+```
+
+
+## Production-grade observability and standardized specs
+
+- `packages/contracts/specs/*.spec.json` is the primary executable contract format. Module `api.contract.md` files are human-readable mirrors.
+- Agents must validate JSON specs with `node scripts/check-spec-kit-contracts.mjs` before implementation handoff.
+- Agents must run `node scripts/security-scanner.mjs` before completion or release.
+- Agents must write a concise decision trace with `node scripts/trace-logger.mjs` before moving a work order to `COMPLETED`.
+- If `project/work-orders/state.json.approval_required` is `true`, execution is paused until a human sets `status` to `APPROVED` or clears the approval gate with an approval note.
+- Do not paste private hidden chain-of-thought into traces. Store only concise decision summaries, evidence, scripts run and changed artifacts.

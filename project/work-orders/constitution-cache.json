@@ -1,0 +1,10 @@
+{
+  "schema": "agentic.factory.ConstitutionCache.v1",
+  "constitution_path": "docs/constitution.md",
+  "constitution_sha256": "2b54a4fc38cc72f6e3e28be39d4992b4623a91da86f659089af7611560979ab5",
+  "verification_command": "node scripts/check-constitution.mjs",
+  "notes": [
+    "Agents may skip rereading docs/constitution.md when this hash is valid.",
+    "If this file changes, rerun check-constitution and update this cache intentionally."
+  ]
+}

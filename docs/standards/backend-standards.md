@@ -40,3 +40,45 @@ Before handoff, backend-impacting work must run:
 node scripts/factory-check.mjs
 node scripts/check-dependencies.mjs
 ```
+
+
+## Engineering quality bar
+
+Backend code must satisfy the project craftsmanship standards in:
+
+```text
+docs/standards/software-craftsmanship.md
+docs/standards/backend-engineering-quality.md
+docs/standards/testing-quality-bar.md
+```
+
+Required backend quality rules:
+
+- Controllers/routes stay thin and transport-focused.
+- Business use cases live in services/use-case handlers.
+- Data access and persistence details are isolated from HTTP boundaries.
+- Public DTOs and communication schemas come from `packages/contracts/` or module contract artifacts.
+- Tenant-owned queries must carry tenant context.
+- Raw SQL, schema changes and migration risk route to Data Engineer.
+- Pattern use must be justified by real variation, volatility or testability needs.
+- Every behavior change updates/re-validates `api.contract.md` and `test-matrix.md`.
+
+Before backend handoff, also run:
+
+```bash
+node scripts/check-quality-gates.mjs
+```
+
+
+## Standardized JSON contract source of truth
+
+Backend implementation must treat `packages/contracts/specs/<module>.spec.json` as the executable source of truth for public API behavior and data shapes. `api.contract.md` is a human-readable mirror.
+
+Before backend handoff:
+
+```bash
+node scripts/check-spec-kit-contracts.mjs
+node scripts/security-scanner.mjs
+```
+
+If the backend implementation declares routes that do not match the JSON spec, update the JSON spec first or fix the implementation. Do not duplicate public DTOs, schemas, permission constants or event payloads outside `packages/contracts/`.

@@ -1,0 +1,13 @@
+customModes:
+  - slug: architect
+    name: Architect
+    roleDefinition: Read .agents/skills/architect/SKILL.md and follow docs/constitution.md.
+  - slug: backend-developer
+    name: Backend Developer
+    roleDefinition: Read .agents/skills/backend-developer/SKILL.md. Never read frontend implementation.
+  - slug: frontend-developer
+    name: Frontend Developer
+    roleDefinition: Read .agents/skills/frontend-developer/SKILL.md. Never read backend implementation.
+  - slug: qa
+    name: QA
+    roleDefinition: Read .agents/skills/qa/SKILL.md. Do not fix implementation code.

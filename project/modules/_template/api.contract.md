@@ -9,6 +9,17 @@
 | Owner | Architect / Backend Developer |
 | Last verified by | TBD |
 
+
+## Primary JSON Spec-Kit artifact
+
+The executable source of truth for this module is:
+
+```text
+packages/contracts/specs/<module-name>.spec.json
+```
+
+This markdown file is a human-readable mirror. Agents must update the JSON spec first, then keep this markdown synchronized. Backend and frontend implementations must consume shared data shapes from `packages/contracts/` instead of redefining DTOs locally.
+
 ## Contract rule
 
 This file must contain strict OpenAPI 3.1 specifications or JSON Schema definitions before backend/frontend integration begins. Tables may summarize endpoints, but the executable contract is the OpenAPI or JSON Schema block.

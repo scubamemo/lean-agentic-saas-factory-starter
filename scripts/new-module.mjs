@@ -22,8 +22,10 @@ for (const file of walk(dest)) {
     .replaceAll('TBD', 'TBD');
   fs.writeFileSync(file, text);
 }
+createSpecKitJson(name);
 console.log(`Created module: project/modules/${name}`);
-console.log('Next: fill MODULE.md, context.md, contracts, and active work order.');
+console.log(`Created primary JSON spec: packages/contracts/specs/${name}.spec.json`);
+console.log('Next: fill MODULE.md, context.md, JSON spec, markdown mirrors, and state.json.');
 
 function copyDir(from, to) {
   fs.mkdirSync(to, { recursive: true });
@@ -42,4 +44,33 @@ function walk(dir) {
     else out.push(full);
   }
   return out;
+}
+
+function pascalCase(input) {
+  return input.split('-').filter(Boolean).map(x => x.charAt(0).toUpperCase() + x.slice(1)).join('');
+}
+function createSpecKitJson(moduleName) {
+  const templatePath = path.join(root, 'packages/contracts/specs/_template.spec.json');
+  if (!fs.existsSync(templatePath)) return;
+  const specPath = path.join(root, `packages/contracts/specs/${moduleName}.spec.json`);
+  if (fs.existsSync(specPath)) return;
+  const pascal = pascalCase(moduleName);
+  const spec = JSON.parse(fs.readFileSync(templatePath, 'utf8'));
+  function replaceDeep(value) {
+    if (typeof value === 'string') return value.replaceAll('<module-name>', moduleName).replaceAll('<module>', moduleName).replaceAll('<ModuleName>', pascal);
+    if (Array.isArray(value)) return value.map(replaceDeep);
+    if (value && typeof value === 'object') {
+      const out = {};
+      for (const [k, v] of Object.entries(value)) out[k.replaceAll('<ModuleName>', pascal)] = replaceDeep(v);
+      return out;
+    }
+    return value;
+  }
+  const next = replaceDeep(spec);
+  next.module = moduleName;
+  next.validation = next.validation || {};
+  next.validation.contract_source_of_truth = `packages/contracts/specs/${moduleName}.spec.json`;
+  next.validation.markdown_mirror = `project/modules/${moduleName}/api.contract.md`;
+  fs.mkdirSync(path.dirname(specPath), { recursive: true });
+  fs.writeFileSync(specPath, `${JSON.stringify(next, null, 2)}\n`);
 }

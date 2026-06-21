@@ -13,9 +13,10 @@ function hasAny(text, phrases) { return phrases.some(p => text.includes(p)); }
 
 const api = read('project/modules/_template/api.contract.md');
 if (!api) fail('Missing project/modules/_template/api.contract.md');
-if (!hasAny(api, ['openapi: 3.1.0', '$schema:', 'JSON Schema'])) {
-  fail('api.contract.md must contain OpenAPI 3.1 or JSON Schema content');
+if (!hasAny(api, ['openapi: 3.1.0', '$schema:', 'JSON Schema', 'packages/contracts/specs/<module-name>.spec.json'])) {
+  fail('api.contract.md must contain OpenAPI 3.1, JSON Schema content, or a primary packages/contracts/specs/<module-name>.spec.json reference');
 }
+if (!fs.existsSync(path.join(root, 'packages/contracts/specs/_template.spec.json'))) fail('Missing primary Spec-Kit JSON template spec: packages/contracts/specs/_template.spec.json');
 for (const phrase of ['additionalProperties: false', 'responses:', 'components:', 'Tenant behavior']) {
   if (!api.includes(phrase)) fail(`api.contract.md missing strict contract phrase: ${phrase}`);
 }
