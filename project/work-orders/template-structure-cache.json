@@ -3,7 +3,7 @@
   "source": "project/modules/_template",
   "generated_by": "scripts/check-template-cache.mjs --refresh or scripts/export-template.mjs",
   "hash_algorithm": "sha256(relative-path:content-sha256)",
-  "template_structure_hash": "a56cd4e94ccd5972edaeca696665ca6c197deb033d7fb7231e9f2d28c0f73a66",
+  "template_structure_hash": "8e7c0edc02a2de37f80d79ca1a48a5ddc150474790f0820b667d6f4505862c23",
   "standards_context_hash": "004203783e9621057d21dfe7a1046abe609fadd63dbdb8e9608710fb45cf18e6",
   "required_files": [
     "MODULE.md",

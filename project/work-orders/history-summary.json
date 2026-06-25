@@ -707,6 +707,67 @@
       "next_dependencies": [
         "Future workflows must reference hook-policy before reads, writes, handoff and completion."
       ]
+    },
+    {
+      "completed_work_order_id": "WO-FACTORY-ALIGN-001",
+      "module": "_template",
+      "changed_contracts": [
+        "spec-driven phase workflow contract",
+        "spec-first implementation gate",
+        "validate workflow gate"
+      ],
+      "changed_implementation_areas": [
+        ".agents/workflows/specify.md",
+        ".agents/workflows/plan.md",
+        ".agents/workflows/tasks.md",
+        ".agents/workflows/implement.md",
+        ".agents/workflows/validate.md",
+        ".agents/workflows/feature-development.md",
+        "scripts/factory-check.mjs",
+        "scripts/check-quality-gates.mjs"
+      ],
+      "decisions": [
+        "Feature development now follows specify, plan, tasks, implement and validate phase workflows.",
+        "Specify captures business intent and updates project/module contracts without implementation.",
+        "Plan identifies modules, contracts, dependencies, risks and required agents.",
+        "Tasks converts the plan into work orders, agent ownership and state transitions.",
+        "Implementation is blocked until specs, plan and tasks are ready; validate handles QA, review and bugfix loop."
+      ],
+      "unresolved_risks": [],
+      "next_dependencies": [
+        "Future feature work must complete specify/plan/tasks before implementation begins."
+      ]
+    },
+    {
+      "completed_work_order_id": "WO-FACTORY-ALIGN-001",
+      "module": "_template",
+      "changed_contracts": [
+        "typed agent handoff payload schema",
+        "schema-valid module handoff contract",
+        "free-text-only handoff rejection rule"
+      ],
+      "changed_implementation_areas": [
+        "packages/contracts/agent-handoff.schema.json",
+        "scripts/check-agent-handoff.mjs",
+        "project/modules/_template/handoff.md",
+        "examples/golden/sample-resource-module/handoff.md",
+        ".agents/rules/mcp-communication.md",
+        "AGENTS.md",
+        "scripts/factory-check.mjs",
+        "scripts/check-quality-gates.mjs",
+        "project/work-orders/template-structure-cache.json",
+        "project/work-orders/traces/WO-FACTORY-ALIGN-001.trace.jsonl"
+      ],
+      "decisions": [
+        "Agent handoffs require exactly one fenced JSON AgentHandoff payload matching packages/contracts/agent-handoff.schema.json.",
+        "StateTransition DTO remains as a compatibility transition mirror, but it is not sufficient by itself.",
+        "check-agent-handoff validates module and golden handoff payloads offline and factory-check treats the validator as a critical gate.",
+        "Template structure cache was refreshed after the intentional handoff template structure change."
+      ],
+      "unresolved_risks": [],
+      "next_dependencies": [
+        "Future generated modules must preserve the AgentHandoff payload block in handoff.md."
+      ]
     }
   ],
   "rules": [

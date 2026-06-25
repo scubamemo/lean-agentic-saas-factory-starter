@@ -233,6 +233,51 @@ requirePhrases('.agents/rules/global.md', [
   'pre-read, pre-write, pre-handoff and',
   'pre-completion'
 ]);
+for (const workflow of ['specify', 'plan', 'tasks', 'implement', 'validate']) {
+  requirePhrases(`.agents/workflows/${workflow}.md`, ['pre-read']);
+}
+requirePhrases('.agents/workflows/specify.md', [
+  'business intent',
+  'implementation-free',
+  'project/PROJECT.md',
+  'project/MODULES.md',
+  'api.contract.md',
+  'ui.contract.md'
+]);
+requirePhrases('.agents/workflows/plan.md', [
+  'technical plan',
+  'modules affected',
+  'contracts to create or update',
+  'required agents',
+  'risks'
+]);
+requirePhrases('.agents/workflows/tasks.md', [
+  'work orders',
+  'state transitions',
+  'implementation as blocked'
+]);
+requirePhrases('.agents/workflows/implement.md', [
+  'script-first',
+  'contract-first',
+  'allowed',
+  'pre-write',
+  'Update affected artifacts'
+]);
+requirePhrases('.agents/workflows/validate.md', [
+  'QA',
+  'Reviewer',
+  'factory-check.mjs',
+  'bugfix.md',
+  'pre-completion'
+]);
+requirePhrases('.agents/workflows/feature-development.md', [
+  '.agents/workflows/specify.md',
+  '.agents/workflows/plan.md',
+  '.agents/workflows/tasks.md',
+  '.agents/workflows/implement.md',
+  '.agents/workflows/validate.md',
+  'Implementation is blocked until specification, plan and task ownership are'
+]);
 requirePhrases('docs/standards/lean-agentic-development.md', [
   'Hash-based standard verification',
   'template_structure_hash',
@@ -360,7 +405,7 @@ for (const mod of modules) {
     'owner',
     'Minimum checks'
   ]);
-  requirePhrases(`${prefix}/handoff.md`, ['checks_run', 'State Transition DTO']);
+  requirePhrases(`${prefix}/handoff.md`, ['checks_run', 'Agent Handoff Payload', 'State Transition DTO']);
 }
 if (!failed) ok('module contract quality sections are present');
 

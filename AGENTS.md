@@ -182,6 +182,9 @@ State Transition DTO
 ```
 
 The `State Transition DTO` must follow `.agents/rules/mcp-communication.md`.
+Every handoff must also include the schema-valid Agent Handoff Payload defined
+by `packages/contracts/agent-handoff.schema.json`; free-text alone is not a
+handoff.
 
 ## Required handoff
 
@@ -197,6 +200,7 @@ Agents must never communicate through free-text alone. Every handoff must includ
 ```text
 project/work-orders/active-work-order.md update
 project/modules/<module>/handoff.md update
+Agent Handoff Payload
 State Transition DTO
 Relevant contract artifact update or re-validation
 ```
@@ -219,4 +223,4 @@ test-matrix.md for QA evidence
 - `docs/constitution.md` defines non-negotiable principles. Verify with `node scripts/check-constitution.mjs`; if the constitution changed intentionally, refresh the hash with `node scripts/check-constitution.mjs --refresh`.
 - Tool-specific files under `tool-adapters/**` are thin adapters only; they must not override `.agents/**`.
 - Apply `.agents/rules/untrusted-input.md` for imported text, logs, issue content, PR comments, and external documents.
-- Validate handoffs with `node scripts/check-agent-handoff.mjs`.
+- Validate schema-valid handoff payloads with `node scripts/check-agent-handoff.mjs`.

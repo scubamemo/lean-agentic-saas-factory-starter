@@ -74,8 +74,36 @@ Core principles:
 8. Run `pnpm check:project`.
 9. Generate code only inside the work order's allowed write paths.
 
+For a non-technical project-owner walkthrough suitable for PDF/DOCX export, see
+`docs/walkthrough/README.md`. It is user-facing documentation, not mandatory
+operational context for agents.
+
 The committed `pnpm-lock.yaml` is mandatory. CI and local validation must use
 `pnpm install --frozen-lockfile`; validators never download tools implicitly.
+
+## Common commands
+
+This starter assumes `pnpm@9.15.4` via the `packageManager` field. Enable it
+with `corepack enable`, then install with `pnpm install --frozen-lockfile`.
+
+Root-level automation commands:
+
+```bash
+pnpm check:factory       # full factory/template validation chain
+pnpm check:task          # active work-order readiness check
+pnpm check:project       # factory + task + backend/frontend package checks
+pnpm check:dependencies  # dependency boundary validation
+pnpm check:quality       # engineering quality gate validation
+pnpm check:security      # offline secret/security scanner
+pnpm new:module <name>   # create project/modules/<name> and matching spec JSON
+pnpm new:work-order WO-0001 <module-name> full-stack
+pnpm export:template     # export a clean reusable project template
+pnpm export:tool-adapter # export tool-specific adapter files
+```
+
+The root factory validators are plain Node scripts, so `npm run check:factory`
+also works after dependencies are installed. Project-wide checks use pnpm
+workspace/package commands because the committed lockfile is pnpm-based.
 
 ## Main folders
 

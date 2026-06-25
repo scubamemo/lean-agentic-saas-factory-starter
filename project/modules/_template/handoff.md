@@ -1,8 +1,9 @@
 # Module Handoff
 
 Use this file for structured module handoffs. Human-readable notes are allowed,
-but every execution handoff must include exactly one current valid State
-Transition DTO.
+but every execution handoff must include exactly one current valid Agent Handoff
+Payload plus the compatibility State Transition DTO. Free-text alone is not a
+handoff.
 
 ## Current status
 
@@ -71,11 +72,43 @@ Allowed values: pm, architect, designer, data-engineer, backend-developer, front
 
 ## Next action
 
-TBD
+Fill module scope and contracts before implementation.
 
 ## Human summary
 
-TBD
+Initial module handoff template. Replace this summary with concise execution
+evidence when a real work order updates this module.
+
+## Agent Handoff Payload
+
+This fenced JSON block is mandatory and must validate against
+`packages/contracts/agent-handoff.schema.json`.
+
+```json
+{
+  "schema_version": "agentic.factory.AgentHandoff.v1",
+  "source_agent": "pm",
+  "target_agent": "pm",
+  "work_order_id": "WO-0001",
+  "module": "<module-name>",
+  "current_state": "PLANNED",
+  "next_state": "IN_PROGRESS",
+  "contract_version": "0.1.0",
+  "changed_artifacts": [
+    "project/modules/<module-name>/api.contract.md",
+    "project/modules/<module-name>/ui.contract.md",
+    "project/modules/<module-name>/dto.md",
+    "project/modules/<module-name>/data-model.md",
+    "project/modules/<module-name>/permissions.md",
+    "project/modules/<module-name>/test-matrix.md"
+  ],
+  "changed_files": [],
+  "scripts_run": [],
+  "validation_errors": [],
+  "blockers": [],
+  "next_action": "Fill module scope and contracts before implementation."
+}
+```
 
 ## State Transition DTO
 

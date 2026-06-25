@@ -99,7 +99,7 @@
     },
     "architect": {
       "status": "complete",
-      "summary": "Hook policy is enforced: agents now have deterministic pre-read, pre-write, pre-handoff and pre-completion blocking steps for minimal context, write-boundary verification, artifact/handoff/trace/state updates, and mandatory completion gates.",
+      "summary": "Typed handoff protocol is enforced: packages/contracts/agent-handoff.schema.json defines the machine-readable AgentHandoff payload, module handoff templates include schema-valid fenced JSON, mcp communication rules reject free-text-only handoffs, and factory-check now runs the handoff validator as a critical gate.",
       "updated_by": "architect",
       "changed_artifacts": [
         ".agents/rules/guardrails.md",
@@ -244,13 +244,28 @@
         "docs/constitution.md",
         "scripts/check-constitution.mjs",
         "project/work-orders/constitution-cache.json",
+        "packages/contracts/agent-handoff.schema.json",
+        "scripts/check-agent-handoff.mjs",
+        "project/modules/_template/handoff.md",
+        "examples/golden/sample-resource-module/handoff.md",
+        ".agents/rules/mcp-communication.md",
+        "AGENTS.md",
+        "scripts/factory-check.mjs",
+        "scripts/check-quality-gates.mjs",
+        "project/work-orders/template-structure-cache.json",
+        "project/work-orders/traces/WO-FACTORY-ALIGN-001.trace.jsonl",
         ".agents/rules/hook-policy.md",
         ".agents/workflows/feature-development.md",
         ".agents/workflows/cyclic-development.md",
         ".agents/workflows/bugfix.md",
         ".agents/workflows/new-module.md",
         ".agents/workflows/new-project.md",
-        ".agents/workflows/review-release.md"
+        ".agents/workflows/review-release.md",
+        ".agents/workflows/specify.md",
+        ".agents/workflows/plan.md",
+        ".agents/workflows/tasks.md",
+        ".agents/workflows/implement.md",
+        ".agents/workflows/validate.md"
       ]
     },
     "designer": {

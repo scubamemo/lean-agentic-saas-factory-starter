@@ -35,6 +35,7 @@
     "check:agent-handoff": "node scripts/check-agent-handoff.mjs",
     "check:untrusted": "node scripts/check-untrusted-instructions.mjs",
     "check:export": "node scripts/check-export-template.mjs",
+    "export:tool-adapter": "node scripts/export-tool-adapter.mjs",
     "export:adapter": "node scripts/export-tool-adapter.mjs"
   },
   "devDependencies": {

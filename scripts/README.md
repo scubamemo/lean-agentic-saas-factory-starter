@@ -8,10 +8,19 @@ This starter intentionally keeps scripts lightweight.
 pnpm check:factory
 pnpm check:task
 pnpm check:project
+pnpm check:dependencies
+pnpm check:quality
+pnpm check:security
 pnpm new:module <module-name>
 pnpm new:work-order <WO-0001> <module-name> [task-type]
 pnpm export:template
+pnpm export:tool-adapter
 ```
+
+`pnpm` is the pinned package manager for this repository. Root factory
+validation is implemented with local Node scripts, so `npm run check:factory`
+can also run after dependencies are installed. Full project checks use pnpm so
+backend and frontend package checks follow the committed lockfile.
 
 ## Design goal
 

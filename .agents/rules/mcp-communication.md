@@ -30,10 +30,41 @@ Every handoff synchronizes:
 - its `project/work-orders/active-work-order.md` mirror;
 - target module `handoff.md`;
 - affected API, DTO, data-model, permission, UI, or test artifact;
-- one valid State Transition DTO.
+- one valid Agent Handoff Payload matching
+  `packages/contracts/agent-handoff.schema.json`;
+- one valid compatibility State Transition DTO.
 
 Write only the payload key assigned to the current role. Follow
 `allowed_transitions`; never clear a human approval gate.
+
+## Agent Handoff Payload Schema
+
+Free-text alone is not a handoff. Every module `handoff.md` must contain exactly
+one fenced `json` block with:
+
+```json
+{
+  "schema_version": "agentic.factory.AgentHandoff.v1",
+  "source_agent": "architect",
+  "target_agent": "qa",
+  "work_order_id": "WO-0001",
+  "module": "module-name",
+  "current_state": "IN_PROGRESS",
+  "next_state": "VALIDATION_REQUIRED",
+  "contract_version": "0.1.0",
+  "changed_artifacts": [],
+  "changed_files": [],
+  "scripts_run": [],
+  "validation_errors": [],
+  "blockers": [],
+  "next_action": "QA validates the listed artifacts and changed files."
+}
+```
+
+Validate with `node scripts/check-agent-handoff.mjs`. The validator enforces the
+required fields from `packages/contracts/agent-handoff.schema.json`; missing
+fields, invalid states, invalid agents, or invalid JSON block handoff and
+completion.
 
 ## State Transition Schema
 
@@ -66,8 +97,7 @@ Write only the payload key assigned to the current role. Follow
 }
 ```
 
-Validate with `node scripts/check-agent-handoff.mjs`. Failed checks or unresolved
-blockers prevent handoff and completion.
+Failed checks or unresolved blockers prevent handoff and completion.
 
 ## Trace and archive guidance
 

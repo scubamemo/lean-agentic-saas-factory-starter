@@ -89,6 +89,67 @@ Hook policy now defines deterministic blocking steps before reads, writes,
 handoffs and completion. The policy requires minimal context, allowed write path
 verification, contract ownership checks, artifact and handoff updates, trace
 records, delta-only state updates, and mandatory completion gates.
+Spec-driven phase workflows now orchestrate feature work through specify,
+plan, tasks, implement and validate phases so implementation cannot start
+before business intent, contracts, technical plan, work-order ownership and
+state transitions are ready.
+Typed handoff protocol now requires a schema-valid `AgentHandoff.v1` JSON
+payload in module handoffs. Free-text alone is invalid, the compatibility
+StateTransition DTO remains as a transition mirror, and `factory-check` runs the
+handoff validator as a critical gate.
+
+## Agent Handoff Payload
+
+```json
+{
+  "schema_version": "agentic.factory.AgentHandoff.v1",
+  "source_agent": "architect",
+  "target_agent": "qa",
+  "work_order_id": "WO-FACTORY-ALIGN-001",
+  "module": "_template",
+  "current_state": "VALIDATION_REQUIRED",
+  "next_state": "QA_PENDING",
+  "contract_version": "0.1.0",
+  "changed_artifacts": [
+    "packages/contracts/agent-handoff.schema.json",
+    "scripts/check-agent-handoff.mjs",
+    "project/modules/_template/handoff.md",
+    "examples/golden/sample-resource-module/handoff.md",
+    ".agents/rules/mcp-communication.md",
+    "AGENTS.md",
+    "scripts/factory-check.mjs",
+    "scripts/check-quality-gates.mjs",
+    "project/work-orders/template-structure-cache.json",
+    "project/work-orders/traces/WO-FACTORY-ALIGN-001.trace.jsonl"
+  ],
+  "changed_files": [
+    "packages/contracts/agent-handoff.schema.json",
+    "scripts/check-agent-handoff.mjs",
+    "project/modules/_template/handoff.md",
+    "examples/golden/sample-resource-module/handoff.md",
+    ".agents/rules/mcp-communication.md",
+    "AGENTS.md",
+    "scripts/factory-check.mjs",
+    "scripts/check-quality-gates.mjs",
+    "project/work-orders/template-structure-cache.json",
+    "project/work-orders/traces/WO-FACTORY-ALIGN-001.trace.jsonl",
+    "project/work-orders/state.json",
+    "project/work-orders/history-summary.json",
+    "project/work-orders/factory-handoff.md"
+  ],
+  "scripts_run": [
+    "node --check scripts/check-agent-handoff.mjs",
+    "node scripts/check-agent-handoff.mjs",
+    "node scripts/check-dto.mjs",
+    "node scripts/check-quality-gates.mjs",
+    "node scripts/check-template-cache.mjs --refresh",
+    "node scripts/trace-logger.mjs"
+  ],
+  "validation_errors": [],
+  "blockers": [],
+  "next_action": "QA reruns factory validation and verifies schema-valid handoff payloads."
+}
+```
 
 ## State Transition DTO
 
@@ -103,14 +164,14 @@ records, delta-only state updates, and mandatory completion gates.
   "current_state": "VALIDATION_REQUIRED",
   "next_state": "QA_PENDING",
   "payload": {
-    "summary": "Hook policy is enforced: agents now have deterministic pre-read, pre-write, pre-handoff and pre-completion blocking steps for minimal context, write-boundary verification, artifact/handoff/trace/state updates, and mandatory completion gates.",
-    "changed_files": [".agents/rules/hook-policy.md", ".agents/rules/global.md", ".agents/workflows/feature-development.md", ".agents/workflows/cyclic-development.md", ".agents/workflows/bugfix.md", ".agents/workflows/new-module.md", ".agents/workflows/new-project.md", ".agents/workflows/review-release.md", "scripts/check-quality-gates.mjs", "project/work-orders/traces/WO-FACTORY-ALIGN-001.trace.jsonl", "project/work-orders/state.json", "project/work-orders/active-work-order.md", "project/work-orders/factory-handoff.md", "project/work-orders/history-summary.json"],
-    "contracts_updated": ["hook-policy blocking contract", "pre-read/pre-write/pre-handoff/pre-completion gates", "workflow hook enforcement"],
+    "summary": "Typed handoff protocol is enforced with a flat AgentHandoff.v1 schema, schema-valid module handoff JSON blocks, a deterministic validator, and critical factory-check integration.",
+    "changed_files": ["packages/contracts/agent-handoff.schema.json", "scripts/check-agent-handoff.mjs", "project/modules/_template/handoff.md", "examples/golden/sample-resource-module/handoff.md", ".agents/rules/mcp-communication.md", "AGENTS.md", "scripts/factory-check.mjs", "scripts/check-quality-gates.mjs", "project/work-orders/template-structure-cache.json", "project/work-orders/traces/WO-FACTORY-ALIGN-001.trace.jsonl", "project/work-orders/state.json", "project/work-orders/history-summary.json", "project/work-orders/factory-handoff.md"],
+    "contracts_updated": ["typed agent handoff payload schema", "schema-valid module handoff contract", "free-text-only handoff rejection rule"],
     "diff_refs": [],
-    "checks_run": ["node --check scripts/check-quality-gates.mjs", "node scripts/check-quality-gates.mjs", "node scripts/factory-check.mjs", "node scripts/task-ready-check.mjs", "node scripts/trace-logger.mjs"],
+    "checks_run": ["node --check scripts/check-agent-handoff.mjs", "node scripts/check-agent-handoff.mjs", "node scripts/check-dto.mjs", "node scripts/check-quality-gates.mjs", "node scripts/check-template-cache.mjs --refresh", "node scripts/trace-logger.mjs"],
     "blockers": [],
     "feedback": [],
-    "next_actions": ["QA independently reruns pnpm check:project and reviews the diff"]
+    "next_actions": ["QA independently reruns pnpm check:project and reviews the typed handoff diff"]
   },
   "context_budget": {
     "mode": "medium",

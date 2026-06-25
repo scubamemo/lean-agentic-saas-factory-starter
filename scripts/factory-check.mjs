@@ -167,7 +167,12 @@ check('.agents/workflows', () => {
     '.agents/workflows/cyclic-development.md',
     '.agents/workflows/bugfix.md',
     '.agents/workflows/new-module.md',
-    '.agents/workflows/feature-development.md'
+    '.agents/workflows/feature-development.md',
+    '.agents/workflows/specify.md',
+    '.agents/workflows/plan.md',
+    '.agents/workflows/tasks.md',
+    '.agents/workflows/implement.md',
+    '.agents/workflows/validate.md'
   ]);
   requirePhrases('.agents/workflows/cyclic-development.md', [
     'PLANNED',
@@ -200,9 +205,50 @@ check('.agents/workflows', () => {
   ]);
   requirePhrases('.agents/workflows/feature-development.md', [
     '.agents/workflows/cyclic-development.md',
+    '.agents/workflows/specify.md',
+    '.agents/workflows/plan.md',
+    '.agents/workflows/tasks.md',
+    '.agents/workflows/implement.md',
+    '.agents/workflows/validate.md',
+    'Implementation is blocked until specification, plan and task ownership are',
     'REVISION_IN_PROGRESS',
     'project/work-orders/bugfix.md',
     'QA and Reviewer cannot fix implementation'
+  ]);
+  requirePhrases('.agents/workflows/specify.md', [
+    'business intent',
+    'Do not write backend or frontend implementation',
+    'project/PROJECT.md',
+    'project/MODULES.md',
+    'api.contract.md',
+    'ui.contract.md'
+  ]);
+  requirePhrases('.agents/workflows/plan.md', [
+    'technical plan',
+    'modules affected',
+    'contracts to create or update',
+    'required agents',
+    'risks'
+  ]);
+  requirePhrases('.agents/workflows/tasks.md', [
+    'work orders',
+    'ownership',
+    'state transitions',
+    'implementation as blocked'
+  ]);
+  requirePhrases('.agents/workflows/implement.md', [
+    'script-first',
+    'contract-first',
+    'allowed',
+    'pre-write',
+    'Update affected artifacts'
+  ]);
+  requirePhrases('.agents/workflows/validate.md', [
+    'QA',
+    'Reviewer',
+    'factory-check.mjs',
+    'bugfix.md',
+    'pre-completion'
   ]);
 });
 
@@ -317,10 +363,7 @@ runScript('skill metadata', 'scripts/check-skill-metadata.mjs', {
   optional: true,
   when: exists('.agents/skills')
 });
-runScript('agent handoff schema', 'scripts/check-agent-handoff.mjs', {
-  optional: true,
-  when: exists('packages/contracts/agent-handoff.schema.json')
-});
+runScript('agent handoff schema', 'scripts/check-agent-handoff.mjs');
 runScript('untrusted instruction rules', 'scripts/check-untrusted-instructions.mjs', {
   optional: true,
   when: exists('.agents/rules/untrusted-input.md')

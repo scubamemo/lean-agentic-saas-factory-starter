@@ -233,7 +233,65 @@ QA/reviewer:
 - Handoff updated
 - Active work order updated
 - Next owner
+- Agent Handoff Payload
 - State Transition DTO
+
+## Agent Handoff Payload
+
+The payload below is the machine-readable handoff contract. Validate with
+`node scripts/check-agent-handoff.mjs`.
+
+```json
+{
+  "schema_version": "agentic.factory.AgentHandoff.v1",
+  "source_agent": "architect",
+  "target_agent": "qa",
+  "work_order_id": "WO-FACTORY-ALIGN-001",
+  "module": "_template",
+  "current_state": "VALIDATION_REQUIRED",
+  "next_state": "QA_PENDING",
+  "contract_version": "0.1.0",
+  "changed_artifacts": [
+    "packages/contracts/agent-handoff.schema.json",
+    "scripts/check-agent-handoff.mjs",
+    "project/modules/_template/handoff.md",
+    "examples/golden/sample-resource-module/handoff.md",
+    ".agents/rules/mcp-communication.md",
+    "AGENTS.md",
+    "scripts/factory-check.mjs",
+    "scripts/check-quality-gates.mjs",
+    "project/work-orders/template-structure-cache.json",
+    "project/work-orders/traces/WO-FACTORY-ALIGN-001.trace.jsonl"
+  ],
+  "changed_files": [
+    "packages/contracts/agent-handoff.schema.json",
+    "scripts/check-agent-handoff.mjs",
+    "project/modules/_template/handoff.md",
+    "examples/golden/sample-resource-module/handoff.md",
+    ".agents/rules/mcp-communication.md",
+    "AGENTS.md",
+    "scripts/factory-check.mjs",
+    "scripts/check-quality-gates.mjs",
+    "project/work-orders/template-structure-cache.json",
+    "project/work-orders/traces/WO-FACTORY-ALIGN-001.trace.jsonl",
+    "project/work-orders/state.json",
+    "project/work-orders/history-summary.json",
+    "project/work-orders/factory-handoff.md",
+    "project/work-orders/active-work-order.md"
+  ],
+  "scripts_run": [
+    "node --check scripts/check-agent-handoff.mjs",
+    "node scripts/check-agent-handoff.mjs",
+    "node scripts/check-dto.mjs",
+    "node scripts/check-quality-gates.mjs",
+    "node scripts/check-template-cache.mjs --refresh",
+    "node scripts/trace-logger.mjs"
+  ],
+  "validation_errors": [],
+  "blockers": [],
+  "next_action": "QA reruns factory validation and verifies schema-valid handoff payloads."
+}
+```
 
 ## State Transition DTO
 
@@ -250,7 +308,7 @@ The DTO below is a mirror of the current transition. The state machine record in
   "current_state": "VALIDATION_REQUIRED",
   "next_state": "QA_PENDING",
   "payload": {
-    "summary": "Hook policy is enforced: agents now have deterministic pre-read, pre-write, pre-handoff and pre-completion blocking steps for minimal context, write-boundary verification, artifact/handoff/trace/state updates, and mandatory completion gates.",
+    "summary": "Spec-driven phase workflows are added: feature development now orchestrates specify, plan, tasks, implement and validate phases so business intent, technical plan, work-order ownership and validation readiness are established before implementation starts.",
     "changed_files": [
       ".agents/README.md",
       ".agents/routing.md",
@@ -369,7 +427,12 @@ The DTO below is a mirror of the current transition. The state machine record in
       ".agents/workflows/bugfix.md",
       ".agents/workflows/new-module.md",
       ".agents/workflows/new-project.md",
-      ".agents/workflows/review-release.md"
+      ".agents/workflows/review-release.md",
+      ".agents/workflows/specify.md",
+      ".agents/workflows/plan.md",
+      ".agents/workflows/tasks.md",
+      ".agents/workflows/implement.md",
+      ".agents/workflows/validate.md"
     ],
     "contracts_updated": [
       "agent governance rules",
@@ -429,6 +492,9 @@ The DTO below is a mirror of the current transition. The state machine record in
       "hook-policy blocking contract",
       "pre-read/pre-write/pre-handoff/pre-completion gates",
       "workflow hook enforcement",
+      "spec-driven phase workflow contract",
+      "spec-first implementation gate",
+      "validate workflow gate",
       "domain-neutral factory documentation",
       "tenancy/RBAC/database standards",
       "agent context/access rules",
