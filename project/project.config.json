@@ -5,7 +5,7 @@
   "tenancyMode": "shared-db-tenant-id",
   "dedicatedInstanceSupported": true,
   "projectMode": "template",
-  "factoryVersion": "13.0.0-lean-cyclic",
+  "factoryVersion": "19.0.0-tool-adapter-constitution",
   "cyclicWorkflow": true,
   "mcpStructuredHandoffs": true,
   "dataEngineerOwnsPrisma": true

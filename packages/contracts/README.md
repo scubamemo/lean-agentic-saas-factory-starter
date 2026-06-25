@@ -47,9 +47,17 @@ All cross-domain communication between `backend/`, `frontend/` and generated mod
 
 `packages/contracts/specs/*.spec.json` is the primary executable contract format. Module markdown files under `project/modules/<module>/` are human-readable mirrors only.
 
-Each spec follows `packages/contracts/spec-kit.module.schema.json` and contains the spec-driven development package used by the factory:
+Each spec follows `packages/contracts/spec-kit.module.schema.json` and contains the spec-driven development package used by the factory. The JSON spec is the machine-readable source for validators and generators; markdown contracts are concise human-readable artifacts for review and collaboration.
 
 ```text
+module      canonical module slug
+version     semantic contract version
+resources   public resources and ownership model
+dto_schemas public DTO JSON schemas
+endpoints   API operations, request/response schemas, errors and permissions
+permissions public permission names and descriptions
+ui_surfaces routes, states, actions and accessibility expectations
+events      emitted/consumed event contracts when applicable
 spec        what/why, user stories, acceptance criteria and non-goals
 plan        implementation approach and quality gates
 data_model  entities and tenant isolation expectations
@@ -59,3 +67,5 @@ quickstart_checks validation commands
 ```
 
 This mirrors the Spec-Kit style of moving from constitution/principles to specification, plan, contracts and executable tasks while keeping the JSON contract machine-verifiable.
+
+Run `node scripts/check-spec-kit-contracts.mjs` after creating or changing any module spec.

@@ -4,6 +4,40 @@
 
 **DEPRECATED AS PRIMARY STATE:** this file is a human-readable mirror only. `project/work-orders/state.json` is the single source of truth. Do not manually advance workflow state by editing this file.
 
+## Lazy context and rolling history
+
+Read prior-step context only from `project/work-orders/history-summary.json`.
+Do not load completed work-order prose or historical handoff logs.
+
+## Delta-only writing
+
+Update only the current role's assigned payload in
+`project/work-orders/state.json`, then synchronize this compact mirror.
+Agents must not regenerate the full `state.json` for a role delta.
+
+```text
+pm -> agent_payloads.pm
+architect -> agent_payloads.architect
+designer -> agent_payloads.designer
+data-engineer -> agent_payloads.data_engineer
+backend-developer -> agent_payloads.backend
+frontend-developer -> agent_payloads.frontend
+qa -> agent_payloads.qa
+code-reviewer -> agent_payloads.code_reviewer
+```
+
+## Pre-development validation
+
+```bash
+node scripts/factory-check.mjs
+node scripts/check-contract-artifacts.mjs
+node scripts/check-dependencies.mjs
+node scripts/check-template-cache.mjs
+node scripts/task-ready-check.mjs
+```
+
+Any failed command blocks implementation and handoff.
+
 
 ## ID
 
@@ -19,7 +53,7 @@ Allowed values: docs-only, contract-only, backend-only, frontend-only, data-mode
 
 PLANNED
 
-Allowed values from `state.json`: PLANNED, IN_PROGRESS, VALIDATION_REQUIRED, QA_PENDING, COMPLETED, FAILED
+Allowed values from `state.json`: PLANNED, IN_PROGRESS, VALIDATION_REQUIRED, QA_PENDING, APPROVED, COMPLETED, FAILED, REVISION_IN_PROGRESS
 
 ## Development chain
 
@@ -124,7 +158,7 @@ QA/reviewer:
 
 ## Optional read
 
-- project/PROJECT.md only if product context is missing from `project/CONTEXT.md`.
+- project/PROJECT.md only if application context is missing from `project/CONTEXT.md`.
 - project/UI.md only if UI context is missing from `project/CONTEXT.md` or `ui.contract.md`.
 - project/MODULES.md only if module ownership is unclear.
 - docs/standards/** only if the task touches that specific standard.

@@ -5,12 +5,12 @@
   "scripts": {
     "dev": "nest start --watch",
     "build": "nest build",
-    "test": "jest --passWithNoTests",
+    "test": "jest",
     "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\" --no-error-on-unmatched-pattern",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "typecheck": "tsc --noEmit",
-    "check": "pnpm typecheck && pnpm lint && pnpm test"
+    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.15",

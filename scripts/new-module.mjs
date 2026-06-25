@@ -18,8 +18,7 @@ for (const file of walk(dest)) {
   if (!file.endsWith('.md')) continue;
   const text = fs.readFileSync(file, 'utf8')
     .replaceAll('<module-name>', name)
-    .replaceAll('<module>', name)
-    .replaceAll('TBD', 'TBD');
+    .replaceAll('<module>', name);
   fs.writeFileSync(file, text);
 }
 createSpecKitJson(name);
@@ -51,7 +50,10 @@ function pascalCase(input) {
 }
 function createSpecKitJson(moduleName) {
   const templatePath = path.join(root, 'packages/contracts/specs/_template.spec.json');
-  if (!fs.existsSync(templatePath)) return;
+  if (!fs.existsSync(templatePath)) {
+    console.error('Missing packages/contracts/specs/_template.spec.json; cannot create module spec');
+    process.exit(1);
+  }
   const specPath = path.join(root, `packages/contracts/specs/${moduleName}.spec.json`);
   if (fs.existsSync(specPath)) return;
   const pascal = pascalCase(moduleName);

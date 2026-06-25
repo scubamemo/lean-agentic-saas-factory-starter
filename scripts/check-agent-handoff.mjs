@@ -8,7 +8,7 @@ function ok(message) { console.log(`OK: ${message}`); }
 function read(rel) { return fs.existsSync(path.join(root, rel)) ? fs.readFileSync(path.join(root, rel), 'utf8') : ''; }
 function jsonBlocks(text) { const out = []; const re = /```json\s*([\s\S]*?)```/g; let m; while ((m = re.exec(text))) out.push(m[1].trim()); return out; }
 const agents = new Set(['pm','architect','designer','data-engineer','backend-developer','frontend-developer','qa','code-reviewer']);
-const states = new Set(['PLANNED','IN_PROGRESS','VALIDATION_REQUIRED','QA_PENDING','APPROVED','COMPLETED','FAILED']);
+const states = new Set(['PLANNED','IN_PROGRESS','VALIDATION_REQUIRED','QA_PENDING','APPROVED','COMPLETED','FAILED','REVISION_IN_PROGRESS']);
 
 const schemaText = read('packages/contracts/agent-handoff.schema.json');
 if (!schemaText) fail('packages/contracts/agent-handoff.schema.json missing');

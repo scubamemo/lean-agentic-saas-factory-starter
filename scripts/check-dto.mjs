@@ -29,7 +29,7 @@ function jsonBlocks(text) {
   return blocks;
 }
 
-const allowedStates = new Set(['PLANNED','IN_PROGRESS','VALIDATION_REQUIRED','QA_PENDING','APPROVED','COMPLETED','FAILED']);
+const allowedStates = new Set(['PLANNED','IN_PROGRESS','VALIDATION_REQUIRED','QA_PENDING','APPROVED','COMPLETED','FAILED','REVISION_IN_PROGRESS']);
 const allowedAgents = new Set(['pm','architect','designer','data-engineer','backend-developer','frontend-developer','qa','code-reviewer']);
 
 function validateDto(dto, rel, { expectedWorkOrderId, expectedModule } = {}) {
@@ -50,7 +50,7 @@ function validateDto(dto, rel, { expectedWorkOrderId, expectedModule } = {}) {
   if (!['small','medium','large'].includes(dto.context_budget?.mode)) fail(`${rel}: invalid context_budget.mode`);
   if (typeof dto.context_budget?.files_read_count !== 'number') fail(`${rel}: context_budget.files_read_count must be numeric`);
   if (!Array.isArray(dto.payload?.contracts_updated)) fail(`${rel}: payload.contracts_updated must be an array`);
-  const behaviorStates = new Set(['VALIDATION_REQUIRED','QA_PENDING','COMPLETED','FAILED']);
+  const behaviorStates = new Set(['VALIDATION_REQUIRED','QA_PENDING','COMPLETED','FAILED','REVISION_IN_PROGRESS']);
   if (behaviorStates.has(dto.current_state) || behaviorStates.has(dto.next_state)) {
     const artifacts = dto.payload?.contracts_updated ?? [];
     if (!artifacts.some(x => ['api.contract.md','ui.contract.md','dto.md','data-model.md','permissions.md','test-matrix.md'].includes(x))) {

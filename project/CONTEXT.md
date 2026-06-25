@@ -2,7 +2,7 @@
 
 Keep this file short. Agents should read this before the longer project documents.
 
-## Product summary
+## Application summary
 
 TBD
 
@@ -16,7 +16,7 @@ TBD
 ## Users and roles
 
 - SuperAdmin: platform owner/support; can manage tenants and impersonate with audit.
-- TenantAdmin: customer admin; manages tenant users/settings.
+- TenantAdmin: tenant organization admin; manages tenant users/settings.
 - User: tenant user; uses assigned features.
 
 ## UI direction summary

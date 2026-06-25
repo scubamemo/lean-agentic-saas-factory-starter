@@ -7,7 +7,14 @@
   "required": [
     "schema",
     "module",
+    "version",
     "status",
+    "resources",
+    "dto_schemas",
+    "endpoints",
+    "permissions",
+    "ui_surfaces",
+    "events",
     "spec",
     "plan",
     "data_model",
@@ -22,6 +29,11 @@
     },
     "module": {
       "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z0-9][a-z0-9-]*$|^<module-name>$"
+    },
+    "version": {
+      "type": "string",
       "minLength": 1
     },
     "status": {
@@ -33,6 +45,45 @@
         "implemented",
         "validated"
       ]
+    },
+    "resources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/resource"
+      }
+    },
+    "dto_schemas": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/jsonSchema"
+      }
+    },
+    "endpoints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/endpoint"
+      }
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/permission"
+      }
+    },
+    "ui_surfaces": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/uiSurface"
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/event"
+      }
     },
     "spec": {
       "type": "object",
@@ -120,7 +171,177 @@
     },
     "validation": {
       "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "contract_source_of_truth",
+        "markdown_mirror"
+      ],
+      "properties": {
+        "contract_source_of_truth": {
+          "type": "string"
+        },
+        "markdown_mirror": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "jsonSchema": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
       "additionalProperties": true
+    },
+    "resource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "ownership",
+        "dto",
+        "tenant_owned"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ownership": {
+          "type": "string",
+          "enum": [
+            "tenant-owned",
+            "platform-owned",
+            "mixed",
+            "none"
+          ]
+        },
+        "dto": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tenant_owned": {
+          "type": "boolean"
+        }
+      }
+    },
+    "endpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operationId",
+        "method",
+        "path",
+        "request_schema",
+        "response_schema",
+        "error_codes",
+        "permission"
+      ],
+      "properties": {
+        "operationId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE"
+          ]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "request_schema": {
+          "type": "string"
+        },
+        "response_schema": {
+          "type": "string",
+          "minLength": 1
+        },
+        "error_codes": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "permission": {
+          "type": "string"
+        }
+      }
+    },
+    "permission": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "description"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "uiSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "route",
+        "purpose",
+        "states",
+        "actions"
+      ],
+      "properties": {
+        "route": {
+          "type": "string",
+          "minLength": 1
+        },
+        "purpose": {
+          "type": "string"
+        },
+        "states": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "schema",
+        "when"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "string"
+        },
+        "when": {
+          "type": "string"
+        }
+      }
     }
   }
 }

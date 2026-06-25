@@ -4,7 +4,7 @@ Use these gates as a practical checklist, not bureaucracy.
 
 ## Ready to code
 
-- `project/CONTEXT.md` contains enough product/UI/module context for the task.
+- `project/CONTEXT.md` contains enough application/UI/module context for the task.
 - Active work order exists.
 - Target module exists.
 - Allowed read/write paths are clear.
@@ -33,7 +33,7 @@ Use these gates as a practical checklist, not bureaucracy.
 - Public API breaking change.
 - Tenant isolation or permission model change.
 - Destructive migration or data backfill.
-- Product behavior not specified by project/module docs.
+- Application behavior not specified by project/module docs.
 
 
 ## Lightweight gates

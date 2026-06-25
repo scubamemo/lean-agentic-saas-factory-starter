@@ -5,6 +5,8 @@
  * or generated packages/api-client outputs. Frontend must not import backend.
  * Backend must not import frontend. packages/shared is not a domain-contract layer;
  * frontend may only import explicitly UI-compatible shared utilities.
+ * Direct feature-to-feature imports are discouraged; public shapes belong in
+ * packages/contracts and behavior crosses modules through approved APIs/events.
  */
 module.exports = {
   forbidden: [
@@ -13,6 +15,13 @@ module.exports = {
       severity: 'error',
       from: { path: '^frontend/' },
       to: { path: '^backend/' }
+    },
+    {
+      name: 'no-frontend-to-prisma-imports',
+      comment: 'Frontend must never import Prisma schema, generated Prisma types, migrations or backend persistence internals.',
+      severity: 'error',
+      from: { path: '^frontend/' },
+      to: { path: '^backend/prisma/' }
     },
     {
       name: 'no-backend-to-frontend-imports',
@@ -29,10 +38,17 @@ module.exports = {
     },
     {
       name: 'no-backend-module-to-other-backend-module',
-      comment: 'Backend module-to-module communication must be represented through packages/contracts or a public app boundary, not direct internal imports.',
-      severity: 'error',
+      comment: 'Backend feature-to-feature imports are discouraged unless Architect-approved; public data structures belong in packages/contracts.',
+      severity: 'warn',
       from: { path: '^backend/src/modules/([^/]+)/' },
-      to: { path: '^backend/src/modules/(?!$1/)' }
+      to: { path: '^backend/src/modules/' }
+    },
+    {
+      name: 'no-frontend-feature-to-feature-imports',
+      comment: 'Frontend feature-to-feature imports are discouraged unless Architect-approved; shared public shapes belong in packages/contracts.',
+      severity: 'warn',
+      from: { path: '^frontend/src/(modules|features)/([^/]+)/' },
+      to: { path: '^frontend/src/(modules|features)/' }
     },
     {
       name: 'no-frontend-domain-to-backend-domain',

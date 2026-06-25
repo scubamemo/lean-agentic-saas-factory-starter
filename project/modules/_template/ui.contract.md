@@ -18,6 +18,13 @@ Use this single file for route, component, mock and visual expectations. Keep it
 - Do not create ad-hoc CSS or inline layout/theme styles.
 - New reusable components must be documented in `frontend/src/components/`.
 - Business behavior must come from this contract, not implementation guesses.
+- Reuse existing components before creating new ones.
+- Accessibility behavior must be testable through `test-matrix.md`.
+- `ui.contract.md`, `api.contract.md`, `dto.md`, `permissions.md`, and
+  `packages/contracts/` are the only accepted frontend/backend communication
+  artifacts for UI/API behavior.
+- Frontend agents must not inspect backend implementation to infer endpoints,
+  DTOs, errors or permissions.
 
 ## Routes / pages
 
@@ -32,6 +39,18 @@ Use this single file for route, component, mock and visual expectations. Keep it
 - Error state: TBD
 - Forbidden state: TBD
 - Success state: TBD
+- Loading state: TBD
+- Mobile/responsive behavior: TBD
+
+## UI states
+
+| State | Trigger | Required UI behavior | Test evidence |
+|---|---|---|---|
+| loading | request pending | TBD | `test-matrix.md` |
+| empty | no records | TBD | `test-matrix.md` |
+| error | recoverable failure | TBD | `test-matrix.md` |
+| forbidden | missing permission | TBD | `test-matrix.md` |
+| success | data/action complete | TBD | `test-matrix.md` |
 
 ## Components
 
@@ -39,11 +58,23 @@ Use this single file for route, component, mock and visual expectations. Keep it
 |---|---|---|---|---|
 | TBD | TBD | `dto.md` | Yes/No | `frontend/src/components/COMPONENTS.md` |
 
-## Forms and actions
+## User actions
 
 | Action | Trigger | API/DTO | Validation | Confirmation |
 |---|---|---|---|---|
 | TBD | TBD | TBD | TBD | TBD |
+
+## Validation
+
+| Field/action | Rule | Error message behavior | Source |
+|---|---|---|---|
+| TBD | TBD | TBD | `api.contract.md` / `dto.md` |
+
+## Permission behavior
+
+| Permission | Visible UI | Disabled/hidden behavior | Forbidden copy |
+|---|---|---|---|
+| TBD | TBD | TBD | TBD |
 
 ## Mock scenarios
 
@@ -64,6 +95,15 @@ Mock data must match `dto.md` and `api.contract.md`.
 - Mobile behavior defined when relevant.
 - Destructive actions require confirmation.
 - Design system components used consistently.
+- Keyboard navigation and focus handling are defined for interactive flows.
+
+## Accessibility expectations
+
+- Interactive controls have accessible names.
+- Keyboard navigation reaches every interactive element.
+- Focus state is visible.
+- Validation errors are announced or associated with fields.
+- Color is not the only signal for state.
 
 ## Contract verification checklist
 

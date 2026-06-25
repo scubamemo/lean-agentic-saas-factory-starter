@@ -24,6 +24,8 @@
     "template_cache",
     "approval_required",
     "approved_by",
+    "approval_requested_by",
+    "approval_reason",
     "approval_notes",
     "observability"
   ],
@@ -63,7 +65,8 @@
         "QA_PENDING",
         "APPROVED",
         "COMPLETED",
-        "FAILED"
+        "FAILED",
+        "REVISION_IN_PROGRESS"
       ]
     },
     "last_updated_by": {
@@ -110,6 +113,16 @@
     },
     "allowed_transitions": {
       "type": "object",
+      "required": [
+        "PLANNED",
+        "IN_PROGRESS",
+        "VALIDATION_REQUIRED",
+        "QA_PENDING",
+        "APPROVED",
+        "FAILED",
+        "REVISION_IN_PROGRESS",
+        "COMPLETED"
+      ],
       "additionalProperties": {
         "type": "array",
         "items": {
@@ -121,7 +134,8 @@
             "QA_PENDING",
             "APPROVED",
             "COMPLETED",
-            "FAILED"
+            "FAILED",
+            "REVISION_IN_PROGRESS"
           ]
         }
       }
@@ -145,7 +159,8 @@
             "QA_PENDING",
             "APPROVED",
             "COMPLETED",
-            "FAILED"
+            "FAILED",
+            "REVISION_IN_PROGRESS"
           ]
         },
         "to": {
@@ -157,7 +172,8 @@
             "QA_PENDING",
             "APPROVED",
             "COMPLETED",
-            "FAILED"
+            "FAILED",
+            "REVISION_IN_PROGRESS"
           ]
         },
         "requested_by": {
@@ -270,7 +286,8 @@
           "const": true
         },
         "active_work_order_md_is_mirror": {
-          "type": "boolean"
+          "type": "boolean",
+          "const": true
         },
         "lazy_context_required": {
           "type": "boolean",
@@ -305,8 +322,42 @@
         },
         "role_payload_keys": {
           "type": "object",
-          "additionalProperties": {
-            "type": "string"
+          "additionalProperties": false,
+          "required": [
+            "pm",
+            "architect",
+            "designer",
+            "data-engineer",
+            "backend-developer",
+            "frontend-developer",
+            "qa",
+            "code-reviewer"
+          ],
+          "properties": {
+            "pm": {
+              "const": "pm"
+            },
+            "architect": {
+              "const": "architect"
+            },
+            "designer": {
+              "const": "designer"
+            },
+            "data-engineer": {
+              "const": "data_engineer"
+            },
+            "backend-developer": {
+              "const": "backend"
+            },
+            "frontend-developer": {
+              "const": "frontend"
+            },
+            "qa": {
+              "const": "qa"
+            },
+            "code-reviewer": {
+              "const": "code_reviewer"
+            }
           }
         }
       }
@@ -315,16 +366,17 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "pm_status",
-        "architect_status",
-        "data_status",
-        "backend_status",
-        "ui_status",
-        "qa_status",
-        "review_status"
+        "pm",
+        "architect",
+        "designer",
+        "backend",
+        "frontend",
+        "data_engineer",
+        "qa",
+        "code_reviewer"
       ],
       "properties": {
-        "pm_status": {
+        "pm": {
           "type": "object",
           "additionalProperties": false,
           "required": [
@@ -351,7 +403,7 @@
             }
           }
         },
-        "architect_status": {
+        "architect": {
           "type": "object",
           "additionalProperties": false,
           "required": [
@@ -378,7 +430,7 @@
             }
           }
         },
-        "data_status": {
+        "designer": {
           "type": "object",
           "additionalProperties": false,
           "required": [
@@ -405,7 +457,7 @@
             }
           }
         },
-        "backend_status": {
+        "backend": {
           "type": "object",
           "additionalProperties": false,
           "required": [
@@ -432,7 +484,7 @@
             }
           }
         },
-        "ui_status": {
+        "frontend": {
           "type": "object",
           "additionalProperties": false,
           "required": [
@@ -459,7 +511,7 @@
             }
           }
         },
-        "qa_status": {
+        "data_engineer": {
           "type": "object",
           "additionalProperties": false,
           "required": [
@@ -486,7 +538,34 @@
             }
           }
         },
-        "review_status": {
+        "qa": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "summary",
+            "updated_by",
+            "changed_artifacts"
+          ],
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "summary": {
+              "type": "string"
+            },
+            "updated_by": {
+              "type": "string"
+            },
+            "changed_artifacts": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "code_reviewer": {
           "type": "object",
           "additionalProperties": false,
           "required": [
@@ -525,6 +604,19 @@
       "type": "boolean"
     },
     "approved_by": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^human:[A-Za-z0-9 ._-]+$"
+    },
+    "approval_requested_by": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "approval_reason": {
       "type": [
         "string",
         "null"
