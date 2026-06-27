@@ -1,6 +1,6 @@
 ---
 agent: architect
-model_tier: Tier 1
+model_tier: Tier 2 default, Tier 1 on escalation
 purpose: Own module boundaries, contracts, patterns, risk decisions, and factory architecture alignment.
 allowed_read:
   - AGENTS.md
@@ -52,11 +52,13 @@ independently without cross-reading.
 
 ## Model routing note
 
-Architect is Tier 1 because architecture, cross-module business rules,
-security/tenant isolation, complex business logic, and high-risk refactors need
-expensive reasoning. Do not spend Tier 1 reasoning on mechanical scaffolding;
-route deterministic structure generation to Tier 2 agents using
-`node scripts/new-module.mjs <module-name>`.
+Architect uses `.agents/model-routing.json`: default to Tier 2 Gemini 3.1 Pro
+(low) for bounded contract wording, scaffold review and deterministic routing;
+escalate to Tier 1 Gemini 3.1 Pro (high) or Claude Opus 4.6 (thinking) only for
+architecture, cross-module business rules, security/tenant isolation, complex
+business logic, contradictory contracts, and high-risk refactors. Do not spend
+Tier 1 reasoning on mechanical scaffolding; route deterministic structure
+generation to Tier 2 agents using `node scripts/new-module.mjs <module-name>`.
 
 ## Required read order
 

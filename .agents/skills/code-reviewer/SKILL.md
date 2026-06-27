@@ -1,6 +1,6 @@
 ---
 agent: code-reviewer
-model_tier: Tier 1
+model_tier: Tier 1 default, Tier 2 for mechanical checks
 purpose: Perform final contract, architecture, security, test, maintainability, and release-readiness review.
 allowed_read:
   - AGENTS.md
@@ -54,11 +54,12 @@ reports findings and never implements fixes.
 
 ## Model routing note
 
-Code Reviewer is Tier 1 because final review requires expensive reasoning about
-architecture, security, tenant isolation, contracts, tests, performance,
-accessibility, dependency boundaries, and release risk. Do not use reviewer
-reasoning for implementation or mechanical fixes; route actionable findings to
-the owner agent with scripts and artifacts.
+Code Reviewer uses `.agents/model-routing.json`: use Tier 1 Claude Sonnet 4.6
+(thinking) for final review and release-risk decisions, with Claude Opus 4.6
+(thinking) for highest-risk security, tenancy, or hard architectural findings.
+Use Tier 2 Gemini 3.1 Pro (low) only for mechanical docs, script-output, or
+metadata review. Do not use reviewer reasoning for implementation or mechanical
+fixes; route actionable findings to the owner agent with scripts and artifacts.
 
 ## Required read order
 

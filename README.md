@@ -60,6 +60,9 @@ Core principles:
   failures.
 - Code reviewers do not implement fixes; reviewers report findings and route
   them to the owner.
+- Model routing is cost-aware: `.agents/model-routing.json` maps agents to
+  default Tier 2 models and Tier 1 escalation models, so role name alone does
+  not force an expensive model.
 
 ## Start here
 

@@ -768,6 +768,36 @@
       "next_dependencies": [
         "Future generated modules must preserve the AgentHandoff payload block in handoff.md."
       ]
+    },
+    {
+      "completed_work_order_id": "WO-FACTORY-ALIGN-001",
+      "module": "_template",
+      "changed_contracts": [
+        "tool-agnostic model routing policy",
+        "agent-to-tier model map",
+        "role-not-equal-tier escalation rule"
+      ],
+      "changed_implementation_areas": [
+        ".agents/model-routing.json",
+        ".agents/routing.md",
+        ".agents/rules/global.md",
+        ".agents/skills",
+        "project/work-orders/_template.md",
+        "scripts/factory-check.mjs",
+        "scripts/check-quality-gates.mjs",
+        "AGENTS.md",
+        "README.md"
+      ],
+      "decisions": [
+        "Default model selection is Tier 2 unless escalation triggers are present.",
+        "Architect and Data Engineer may use Tier 2 for bounded mechanical work; role name alone must not force an expensive model.",
+        "Tier 1 is reserved for architecture, security/tenant isolation, schema/migration risk, critical QA failures, high-risk refactors and final release decisions.",
+        ".agents/model-routing.json is the machine-readable model routing policy for tool adapters."
+      ],
+      "unresolved_risks": [],
+      "next_dependencies": [
+        "Tool adapters may map the policy display names to provider-specific model identifiers."
+      ]
     }
   ],
   "rules": [

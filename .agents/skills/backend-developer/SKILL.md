@@ -1,6 +1,6 @@
 ---
 agent: backend-developer
-model_tier: Tier 2
+model_tier: Tier 2 default, Tier 1 on escalation
 purpose: Implement backend behavior and backend tests inside API, DTO, permission, and data contracts.
 allowed_read:
   - AGENTS.md
@@ -57,13 +57,14 @@ own Prisma schema or frontend implementation.
 
 ## Model routing note
 
-Backend Developer is Tier 2 for straightforward implementation, boilerplate,
-script execution, tests, and state updates. Escalate to Tier 1 Architect/Data
-Engineer when work touches schema/migration impact, tenant isolation,
-auth/session/permission behavior, cross-module business rules, critical
-performance risk, complex business logic, repeated QA failure, or major
-refactor. Use `node scripts/new-module.mjs <module-name>` for generated module
-structure instead of reasoning through scaffolding.
+Backend Developer uses `.agents/model-routing.json`: default to Tier 2 Gemini
+3.5 Flash for straightforward implementation, boilerplate, script execution,
+tests, and state updates. Escalate to Claude Sonnet 4.6 (thinking) or the
+Architect/Data Engineer route when work touches schema/migration impact, tenant
+isolation, auth/session/permission behavior, cross-module business rules,
+critical performance risk, complex business logic, repeated QA failure, or
+major refactor. Use `node scripts/new-module.mjs <module-name>` for generated
+module structure instead of reasoning through scaffolding.
 
 ## Required read order
 

@@ -1,6 +1,6 @@
 ---
 agent: frontend-developer
-model_tier: Tier 2
+model_tier: Tier 2 default, Tier 1 on escalation
 purpose: Implement contract-driven frontend behavior with design-system components and UI tests.
 allowed_read:
   - AGENTS.md
@@ -55,13 +55,14 @@ first; never implement backend behavior.
 
 ## Model routing note
 
-Frontend Developer is Tier 2 for straightforward UI implementation,
-boilerplate, script execution, component documentation, tests, and state
-updates. Escalate to Tier 1 Architect/Reviewer when UI work exposes
-cross-module business rules, auth/session/permission ambiguity, tenant
-isolation risk, critical performance risk, repeated QA failure, major refactor,
-or complex business logic. Use `node scripts/new-module.mjs <module-name>` for
-generated module structure instead of reasoning through scaffolding.
+Frontend Developer uses `.agents/model-routing.json`: default to Tier 2 Gemini
+3.5 Flash for straightforward UI implementation, boilerplate, script execution,
+component documentation, tests, and state updates. Escalate to Tier 1 Claude
+Sonnet 4.6 (thinking) or Architect/Reviewer when UI work exposes cross-module
+business rules, auth/session/permission ambiguity, tenant isolation risk,
+critical performance risk, repeated QA failure, major refactor, or complex
+business logic. Use `node scripts/new-module.mjs <module-name>` for generated
+module structure instead of reasoning through scaffolding.
 
 ## Required read order
 

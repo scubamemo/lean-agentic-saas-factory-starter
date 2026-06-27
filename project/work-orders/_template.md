@@ -71,6 +71,21 @@ Allowed values: small, medium, large
 - medium: one or two modules, up to 20 files read, plan before code.
 - large: no direct implementation; split into smaller work orders.
 
+## Model routing
+
+Source: `.agents/model-routing.json`
+
+Default tier: Tier 2
+
+Escalate to Tier 1 only when the work touches schema/migration impact,
+tenant isolation, auth/session/permission changes, cross-module business rules,
+critical performance risk, repeated QA failure, high-risk refactor,
+security-sensitive behavior, contradictory contracts or unclear ownership.
+
+Role alone does not force an expensive model. Architect and Data Engineer may
+use Tier 2 for bounded mechanical work; PM, Designer, Backend, Frontend or QA
+must escalate when risk triggers are present.
+
 ## Owner
 
 pm

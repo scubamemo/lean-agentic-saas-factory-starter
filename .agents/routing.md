@@ -58,6 +58,13 @@ If a role needs forbidden context, route a blocker instead of opening the file:
 
 ## Model Tiering Matrix
 
+Canonical machine-readable policy: `.agents/model-routing.json`.
+
+Role is not the same thing as model tier. Use the active task risk, not the
+agent name alone, to select a model. For example, Architect may use Tier 2 for a
+small contract wording change or deterministic scaffold review, then escalate to
+Tier 1 only when architecture/risk triggers are present.
+
 | Tier | Cost profile | Primary use | Examples |
 |---|---|---|---|
 | Tier 1 | high-reasoning / expensive | Risk, architecture, review and complex decisions | architect, code-reviewer, critical QA failure, security/tenant isolation risk, complex business logic, high-risk refactor |
@@ -85,6 +92,22 @@ or escalated with evidence.
 
 Model choice never bypasses checks, role ownership, context boundaries, or
 human approval.
+
+## Recommended model map
+
+Use `.agents/model-routing.json` as the source for adapters. These display
+names are tool-agnostic; adapter layers may map them to provider-specific IDs.
+
+| Agent | Default tier | Tier 2 model | Tier 1 / escalation model |
+|---|---|---|---|
+| PM | Tier 2 | Gemini 3 Flash | Claude Sonnet 4.6 (thinking) |
+| Architect | Tier 2 by default, Tier 1 on risk | Gemini 3.1 Pro (low) | Gemini 3.1 Pro (high), then Claude Opus 4.6 (thinking) for highest risk |
+| Designer | Tier 2 | Gemini 3.5 Flash | Claude Sonnet 4.6 (thinking) |
+| Backend Developer | Tier 2 | Gemini 3.5 Flash | Claude Sonnet 4.6 (thinking), then Claude Opus 4.6 (thinking) for hard failures |
+| Frontend Developer | Tier 2 | Gemini 3.5 Flash | Claude Sonnet 4.6 (thinking) |
+| Data Engineer | Tier 2 by default, Tier 1 on schema/data risk | Gemini 3.1 Pro (low) | Gemini 3.1 Pro (high), then Claude Opus 4.6 (thinking) for destructive or tenant-risk work |
+| QA | Tier 2 | Gemini 3.5 Flash or GPT-OSS-120b | Claude Sonnet 4.6 (thinking), then Claude Opus 4.6 (thinking) for release blockers |
+| Code Reviewer | Tier 1 for final review | Gemini 3.1 Pro (low) for mechanical checks | Claude Sonnet 4.6 (thinking), then Claude Opus 4.6 (thinking) for final/high-risk release |
 
 ## Escalation triggers
 

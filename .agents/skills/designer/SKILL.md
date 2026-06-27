@@ -1,6 +1,6 @@
 ---
 agent: designer
-model_tier: Tier 2
+model_tier: Tier 2 default, Tier 1 on escalation
 purpose: Define UI contracts, UX flows, states, accessibility expectations, and design-system compliance.
 allowed_read:
   - AGENTS.md
@@ -54,10 +54,11 @@ contracts without writing production UI code.
 
 ## Model routing note
 
-Designer is Tier 2 for bounded UI contracts, state definitions, accessibility
-expectations, and component guidance. Escalate to Tier 1 Architect when a design
-decision changes cross-module behavior, permissions, tenant-sensitive flows,
-critical performance, or major refactor scope.
+Designer uses `.agents/model-routing.json`: default to Tier 2 Gemini 3.5 Flash
+for bounded UI contracts, state definitions, accessibility expectations, and
+component guidance. Escalate to Tier 1 Claude Sonnet 4.6 (thinking) or
+Architect when a design decision changes cross-module behavior, permissions,
+tenant-sensitive flows, critical performance, or major refactor scope.
 
 ## Required read order
 

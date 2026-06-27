@@ -1,6 +1,6 @@
 ---
 agent: pm
-model_tier: Tier 2
+model_tier: Tier 2 default, Tier 1 on escalation
 purpose: Own project scope, MVP slicing, personas, phases, acceptance criteria, and work-order readiness.
 allowed_read:
   - AGENTS.md
@@ -55,10 +55,12 @@ project explicitly supplies domain requirements.
 
 ## Model routing note
 
-PM is Tier 2 for scope, acceptance criteria, state updates, and deterministic
-work-order shaping. Use scripts for generated structure and route complex
-business logic, cross-module rules, security/tenant risk, repeated QA failure,
-or high-risk refactor decisions to Tier 1 Architect/Reviewer.
+PM uses `.agents/model-routing.json`: default to Tier 2 Gemini 3 Flash for
+scope, acceptance criteria, state updates, and deterministic work-order shaping;
+use Gemini 3.1 Pro (low) when a product plan needs a little more reasoning.
+Use scripts for generated structure and route complex business logic,
+cross-module rules, security/tenant risk, repeated QA failure, or high-risk
+refactor decisions to Tier 1 Architect/Reviewer.
 
 ## Required read order
 

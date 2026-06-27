@@ -97,6 +97,9 @@ Typed handoff protocol now requires a schema-valid `AgentHandoff.v1` JSON
 payload in module handoffs. Free-text alone is invalid, the compatibility
 StateTransition DTO remains as a transition mirror, and `factory-check` runs the
 handoff validator as a critical gate.
+Model routing now has a machine-readable policy in `.agents/model-routing.json`
+with per-agent default Tier 2 models, Tier 1 escalation models, and the rule
+that role name alone must not force an expensive model.
 
 ## Agent Handoff Payload
 
@@ -111,43 +114,55 @@ handoff validator as a critical gate.
   "next_state": "QA_PENDING",
   "contract_version": "0.1.0",
   "changed_artifacts": [
-    "packages/contracts/agent-handoff.schema.json",
-    "scripts/check-agent-handoff.mjs",
-    "project/modules/_template/handoff.md",
-    "examples/golden/sample-resource-module/handoff.md",
-    ".agents/rules/mcp-communication.md",
+    ".agents/model-routing.json",
+    ".agents/routing.md",
+    ".agents/rules/global.md",
+    ".agents/skills/architect/SKILL.md",
+    ".agents/skills/backend-developer/SKILL.md",
+    ".agents/skills/code-reviewer/SKILL.md",
+    ".agents/skills/data-engineer/SKILL.md",
+    ".agents/skills/designer/SKILL.md",
+    ".agents/skills/frontend-developer/SKILL.md",
+    ".agents/skills/pm/SKILL.md",
+    ".agents/skills/qa/SKILL.md",
     "AGENTS.md",
+    "README.md",
+    "project/work-orders/_template.md",
     "scripts/factory-check.mjs",
-    "scripts/check-quality-gates.mjs",
-    "project/work-orders/template-structure-cache.json",
-    "project/work-orders/traces/WO-FACTORY-ALIGN-001.trace.jsonl"
+    "scripts/check-quality-gates.mjs"
   ],
   "changed_files": [
-    "packages/contracts/agent-handoff.schema.json",
-    "scripts/check-agent-handoff.mjs",
-    "project/modules/_template/handoff.md",
-    "examples/golden/sample-resource-module/handoff.md",
-    ".agents/rules/mcp-communication.md",
+    ".agents/model-routing.json",
+    ".agents/routing.md",
+    ".agents/rules/global.md",
+    ".agents/skills/architect/SKILL.md",
+    ".agents/skills/backend-developer/SKILL.md",
+    ".agents/skills/code-reviewer/SKILL.md",
+    ".agents/skills/data-engineer/SKILL.md",
+    ".agents/skills/designer/SKILL.md",
+    ".agents/skills/frontend-developer/SKILL.md",
+    ".agents/skills/pm/SKILL.md",
+    ".agents/skills/qa/SKILL.md",
     "AGENTS.md",
+    "README.md",
+    "project/work-orders/_template.md",
     "scripts/factory-check.mjs",
     "scripts/check-quality-gates.mjs",
-    "project/work-orders/template-structure-cache.json",
     "project/work-orders/traces/WO-FACTORY-ALIGN-001.trace.jsonl",
     "project/work-orders/state.json",
     "project/work-orders/history-summary.json",
     "project/work-orders/factory-handoff.md"
   ],
   "scripts_run": [
-    "node --check scripts/check-agent-handoff.mjs",
-    "node scripts/check-agent-handoff.mjs",
-    "node scripts/check-dto.mjs",
+    "node -e 'JSON.parse(require(\"fs\").readFileSync(\".agents/model-routing.json\",\"utf8\"))'",
+    "node scripts/check-skill-metadata.mjs",
     "node scripts/check-quality-gates.mjs",
-    "node scripts/check-template-cache.mjs --refresh",
+    "node scripts/factory-check.mjs",
     "node scripts/trace-logger.mjs"
   ],
   "validation_errors": [],
   "blockers": [],
-  "next_action": "QA reruns factory validation and verifies schema-valid handoff payloads."
+  "next_action": "QA reruns factory validation and verifies model routing policy."
 }
 ```
 
@@ -164,14 +179,14 @@ handoff validator as a critical gate.
   "current_state": "VALIDATION_REQUIRED",
   "next_state": "QA_PENDING",
   "payload": {
-    "summary": "Typed handoff protocol is enforced with a flat AgentHandoff.v1 schema, schema-valid module handoff JSON blocks, a deterministic validator, and critical factory-check integration.",
-    "changed_files": ["packages/contracts/agent-handoff.schema.json", "scripts/check-agent-handoff.mjs", "project/modules/_template/handoff.md", "examples/golden/sample-resource-module/handoff.md", ".agents/rules/mcp-communication.md", "AGENTS.md", "scripts/factory-check.mjs", "scripts/check-quality-gates.mjs", "project/work-orders/template-structure-cache.json", "project/work-orders/traces/WO-FACTORY-ALIGN-001.trace.jsonl", "project/work-orders/state.json", "project/work-orders/history-summary.json", "project/work-orders/factory-handoff.md"],
-    "contracts_updated": ["typed agent handoff payload schema", "schema-valid module handoff contract", "free-text-only handoff rejection rule"],
+    "summary": "Model routing policy is explicit and tool-agnostic: .agents/model-routing.json maps each agent to default Tier 2 models and Tier 1 escalation models, routing/global rules state role is not model tier, and factory-check validates the policy.",
+    "changed_files": [".agents/model-routing.json", ".agents/routing.md", ".agents/rules/global.md", ".agents/skills/architect/SKILL.md", ".agents/skills/backend-developer/SKILL.md", ".agents/skills/code-reviewer/SKILL.md", ".agents/skills/data-engineer/SKILL.md", ".agents/skills/designer/SKILL.md", ".agents/skills/frontend-developer/SKILL.md", ".agents/skills/pm/SKILL.md", ".agents/skills/qa/SKILL.md", "AGENTS.md", "README.md", "project/work-orders/_template.md", "scripts/factory-check.mjs", "scripts/check-quality-gates.mjs", "project/work-orders/traces/WO-FACTORY-ALIGN-001.trace.jsonl", "project/work-orders/state.json", "project/work-orders/history-summary.json", "project/work-orders/factory-handoff.md"],
+    "contracts_updated": ["tool-agnostic model routing policy", "agent-to-tier model map", "role-not-equal-tier escalation rule"],
     "diff_refs": [],
-    "checks_run": ["node --check scripts/check-agent-handoff.mjs", "node scripts/check-agent-handoff.mjs", "node scripts/check-dto.mjs", "node scripts/check-quality-gates.mjs", "node scripts/check-template-cache.mjs --refresh", "node scripts/trace-logger.mjs"],
+    "checks_run": ["node scripts/check-skill-metadata.mjs", "node scripts/check-quality-gates.mjs", "node scripts/factory-check.mjs", "node scripts/trace-logger.mjs"],
     "blockers": [],
     "feedback": [],
-    "next_actions": ["QA independently reruns pnpm check:project and reviews the typed handoff diff"]
+    "next_actions": ["QA independently reruns pnpm check:project and reviews the model routing policy diff"]
   },
   "context_budget": {
     "mode": "medium",

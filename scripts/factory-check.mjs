@@ -90,6 +90,7 @@ check('required root files', () => {
     'AGENTS.md',
     'package.json',
     'pnpm-workspace.yaml',
+    '.agents/model-routing.json',
     'project/project.config.json',
     'factory/dependency-cruiser.cjs',
     '.dependency-cruiser.cjs',
@@ -137,6 +138,36 @@ check('.agents/rules', () => {
     'history-summary.json',
     'never read historical handoff.md'
   ]);
+});
+
+check('model routing policy', () => {
+  const routing = readJson('.agents/model-routing.json');
+  if (routing.schema_version !== 'agentic.factory.ModelRouting.v1') {
+    throw new Error('.agents/model-routing.json schema_version mismatch');
+  }
+  if (!routing.default_rule?.includes('Role name alone must not force an expensive model')) {
+    throw new Error('.agents/model-routing.json must state role is not model tier');
+  }
+  for (const tier of ['tier_1', 'tier_2']) {
+    if (!routing.tiers?.[tier]?.models?.length) throw new Error(`missing models for ${tier}`);
+  }
+  const requiredAgents = [
+    'pm',
+    'architect',
+    'designer',
+    'backend-developer',
+    'frontend-developer',
+    'data-engineer',
+    'qa',
+    'code-reviewer'
+  ];
+  for (const agent of requiredAgents) {
+    const config = routing.agents?.[agent];
+    if (!config) throw new Error(`missing model routing for ${agent}`);
+    if (!config.default_tier) throw new Error(`${agent} missing default_tier`);
+    if (!config.tier_2_model) throw new Error(`${agent} missing tier_2_model`);
+    if (!config.tier_1_model) throw new Error(`${agent} missing tier_1_model`);
+  }
 });
 
 check('.agents/skills', () => {

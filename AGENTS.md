@@ -12,14 +12,16 @@ these coordination artifacts before implementation:
 .agents/rules/global.md
 .agents/rules/context-budget.md
 .agents/routing.md
+.agents/model-routing.json
 project/work-orders/state.json
 project/work-orders/history-summary.json
 project/CONTEXT.md
 ```
 
 Use `project/work-orders/state.json` as the workflow source of truth. Use
-`.agents/routing.md` to select the role for the active work order. Do not infer
-scope from repository shape or perform a full-repo scan.
+`.agents/routing.md` to select the role for the active work order and
+`.agents/model-routing.json` to select the default/escalation model tier. Do not
+infer scope from repository shape or perform a full-repo scan.
 
 ## Required rule files
 

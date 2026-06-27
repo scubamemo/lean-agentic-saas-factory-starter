@@ -1,0 +1,193 @@
+{
+  "schema_version": "agentic.factory.ModelRouting.v1",
+  "purpose": "Tool-agnostic model routing policy for agent roles and task risk tiers. Adapters may map display names to provider-specific model IDs.",
+  "default_rule": "Use Tier 2 unless an escalation trigger is present. Role name alone must not force an expensive model.",
+  "tiers": {
+    "tier_2": {
+      "label": "lightweight / cheap",
+      "use_for": [
+        "PM grooming",
+        "project-owner documentation",
+        "module scaffold generation",
+        "script execution",
+        "terminal-output parsing",
+        "state updates",
+        "bounded contract edits",
+        "straightforward backend/frontend implementation"
+      ],
+      "models": [
+        {
+          "name": "Gemini 3.5 Flash",
+          "best_for": "Fast agentic coding, bounded implementation, contract edits, validator-output fixes."
+        },
+        {
+          "name": "Gemini 3 Flash",
+          "best_for": "Low-cost documentation, state updates, simple summaries and deterministic script tasks."
+        },
+        {
+          "name": "Gemini 3.1 Pro (low)",
+          "best_for": "Moderate planning or architecture with low reasoning budget."
+        },
+        {
+          "name": "GPT-OSS-120b",
+          "best_for": "Local/private batch review, documentation, terminal-output parsing and low-risk helper tasks."
+        }
+      ]
+    },
+    "tier_1": {
+      "label": "high-reasoning / expensive",
+      "use_for": [
+        "architecture decisions",
+        "security and tenant isolation",
+        "auth/session/permission behavior",
+        "schema or migration risk",
+        "cross-module business rules",
+        "critical QA failures",
+        "high-risk refactors",
+        "final release review"
+      ],
+      "models": [
+        {
+          "name": "Claude Sonnet 4.6 (thinking)",
+          "best_for": "Senior coding, review, multi-step bugfix reasoning and most Tier 1 implementation risk."
+        },
+        {
+          "name": "Gemini 3.1 Pro (high)",
+          "best_for": "Deep planning, architecture tradeoffs, data/tenant reasoning and high-context decisions."
+        },
+        {
+          "name": "Claude Opus 4.6 (thinking)",
+          "best_for": "Highest-risk architecture, security, tenancy, hard bug and final release decisions."
+        }
+      ]
+    }
+  },
+  "agents": {
+    "pm": {
+      "default_tier": "tier_2",
+      "tier_2_model": "Gemini 3 Flash",
+      "strong_tier_2_model": "Gemini 3.1 Pro (low)",
+      "tier_1_model": "Claude Sonnet 4.6 (thinking)",
+      "use_tier_1_only_when": [
+        "complex business logic",
+        "cross-module scope conflict",
+        "high-risk release decision"
+      ]
+    },
+    "architect": {
+      "default_tier": "tier_2",
+      "tier_2_model": "Gemini 3.1 Pro (low)",
+      "strong_tier_2_model": "Gemini 3.5 Flash",
+      "tier_1_model": "Gemini 3.1 Pro (high)",
+      "max_escalation_model": "Claude Opus 4.6 (thinking)",
+      "use_tier_1_only_when": [
+        "new module boundary decision",
+        "cross-module architecture",
+        "tenant isolation",
+        "auth/session/permission behavior",
+        "schema or migration impact",
+        "high-risk refactor",
+        "contradictory contracts"
+      ]
+    },
+    "designer": {
+      "default_tier": "tier_2",
+      "tier_2_model": "Gemini 3.5 Flash",
+      "strong_tier_2_model": "Gemini 3.1 Pro (low)",
+      "tier_1_model": "Claude Sonnet 4.6 (thinking)",
+      "use_tier_1_only_when": [
+        "cross-module UX decision",
+        "permission-sensitive UI flow",
+        "critical accessibility or performance risk"
+      ]
+    },
+    "backend-developer": {
+      "default_tier": "tier_2",
+      "tier_2_model": "Gemini 3.5 Flash",
+      "strong_tier_2_model": "Claude Sonnet 4.6 (thinking)",
+      "tier_1_model": "Claude Sonnet 4.6 (thinking)",
+      "max_escalation_model": "Claude Opus 4.6 (thinking)",
+      "use_tier_1_only_when": [
+        "complex business logic",
+        "tenant isolation",
+        "auth/session/permission behavior",
+        "critical performance risk",
+        "repeated QA failure",
+        "high-risk refactor"
+      ]
+    },
+    "frontend-developer": {
+      "default_tier": "tier_2",
+      "tier_2_model": "Gemini 3.5 Flash",
+      "strong_tier_2_model": "Claude Sonnet 4.6 (thinking)",
+      "tier_1_model": "Claude Sonnet 4.6 (thinking)",
+      "use_tier_1_only_when": [
+        "cross-module workflow",
+        "auth/session/permission ambiguity",
+        "critical accessibility or performance risk",
+        "repeated QA failure",
+        "major UI refactor"
+      ]
+    },
+    "data-engineer": {
+      "default_tier": "tier_2",
+      "tier_2_model": "Gemini 3.1 Pro (low)",
+      "strong_tier_2_model": "Gemini 3.5 Flash",
+      "tier_1_model": "Gemini 3.1 Pro (high)",
+      "max_escalation_model": "Claude Opus 4.6 (thinking)",
+      "use_tier_1_only_when": [
+        "schema or migration impact",
+        "tenant isolation",
+        "index or query performance risk",
+        "destructive data change",
+        "cross-module data model"
+      ]
+    },
+    "qa": {
+      "default_tier": "tier_2",
+      "tier_2_model": "Gemini 3.5 Flash",
+      "strong_tier_2_model": "GPT-OSS-120b",
+      "tier_1_model": "Claude Sonnet 4.6 (thinking)",
+      "max_escalation_model": "Claude Opus 4.6 (thinking)",
+      "use_tier_1_only_when": [
+        "critical QA failure",
+        "repeated QA failure",
+        "tenant isolation risk",
+        "auth/session/permission ambiguity",
+        "security regression",
+        "release-blocking uncertainty"
+      ]
+    },
+    "code-reviewer": {
+      "default_tier": "tier_1",
+      "tier_2_model": "Gemini 3.1 Pro (low)",
+      "tier_1_model": "Claude Sonnet 4.6 (thinking)",
+      "max_escalation_model": "Claude Opus 4.6 (thinking)",
+      "use_tier_2_only_when": [
+        "mechanical docs review",
+        "script-output review",
+        "non-release typo or metadata review"
+      ]
+    }
+  },
+  "global_escalation_triggers": [
+    "repeated QA failure",
+    "schema/migration impact",
+    "tenant isolation",
+    "auth/session/permission changes",
+    "cross-module business rules",
+    "critical performance risk",
+    "major refactor",
+    "security-sensitive behavior",
+    "secret/config risk",
+    "contradictory contracts",
+    "unclear ownership"
+  ],
+  "hard_rules": [
+    "Model routing never bypasses validation scripts.",
+    "Model routing never bypasses role read/write boundaries.",
+    "Model routing never grants human approval.",
+    "Expensive models must not be used for mechanical script execution unless a lower tier failed with evidence.",
+    "Escalation must include the smallest evidence bundle and must not request a full-repo scan."
+  ]
+}

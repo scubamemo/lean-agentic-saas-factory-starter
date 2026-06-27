@@ -179,12 +179,17 @@ entire file to publish a small delta.
 
 ## Model routing
 
-Use model tiers to reduce token cost by default.
+Use model tiers to reduce token cost by default. The canonical model policy is
+`.agents/model-routing.json`.
 
 ```text
 Tier 1 = high-reasoning / expensive
 Tier 2 = lightweight / cheap
 ```
+
+Role is not model tier. Architect, Data Engineer or Reviewer may use a cheaper
+model for mechanical script-output parsing or small wording changes; PM,
+Designer, Backend, Frontend or QA must escalate when risk triggers are present.
 
 Use Tier 2 by default for PM grooming, designer contract work, backend/frontend
 boilerplate, script execution, state updates, deterministic scaffolding, and
@@ -201,6 +206,19 @@ security/tenant isolation risk, complex business logic, high-risk refactor, or
 business/risk decisions that cannot be resolved by scripts and contracts.
 Expensive models should focus on business logic, architecture, review, security
 and risk decisions, not mechanical script execution.
+
+Default model map:
+
+```text
+pm -> Tier 2 Gemini 3 Flash; escalate to Claude Sonnet 4.6 (thinking)
+architect -> Tier 2 Gemini 3.1 Pro (low); escalate to Gemini 3.1 Pro (high) or Claude Opus 4.6 (thinking)
+designer -> Tier 2 Gemini 3.5 Flash; escalate to Claude Sonnet 4.6 (thinking)
+backend-developer -> Tier 2 Gemini 3.5 Flash; escalate to Claude Sonnet 4.6 (thinking)
+frontend-developer -> Tier 2 Gemini 3.5 Flash; escalate to Claude Sonnet 4.6 (thinking)
+data-engineer -> Tier 2 Gemini 3.1 Pro (low); escalate to Gemini 3.1 Pro (high) or Claude Opus 4.6 (thinking)
+qa -> Tier 2 Gemini 3.5 Flash or GPT-OSS-120b; escalate to Claude Sonnet 4.6 (thinking)
+code-reviewer -> Tier 1 Claude Sonnet 4.6 (thinking) for final review; Claude Opus 4.6 (thinking) for highest risk
+```
 
 Escalate from Tier 2 to Tier 1 when any of these occur:
 

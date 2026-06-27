@@ -162,6 +162,14 @@ requirePhrases('docs/standards/code-review-quality-bar.md', [
   'Lazy standard loading'
 ]);
 requirePhrases('.agents/routing.md', [
+  '.agents/model-routing.json',
+  'Role is not the same thing as model tier',
+  'Gemini 3.5 Flash',
+  'Gemini 3.1 Pro (high)',
+  'Gemini 3.1 Pro (low)',
+  'Claude Sonnet 4.6 (thinking)',
+  'Claude Opus 4.6 (thinking)',
+  'GPT-OSS-120b',
   'Tier 1',
   'high-reasoning / expensive',
   'architect',
@@ -185,6 +193,10 @@ requirePhrases('.agents/routing.md', [
   'major refactor'
 ]);
 requirePhrases('.agents/rules/global.md', [
+  '.agents/model-routing.json',
+  'Role is not model tier',
+  'Gemini 3.5 Flash',
+  'Claude Sonnet 4.6 (thinking)',
   'Tier 1 = high-reasoning / expensive',
   'Tier 2 = lightweight / cheap',
   'Use Tier 2 by default',

@@ -1,6 +1,6 @@
 ---
 agent: data-engineer
-model_tier: Tier 1
+model_tier: Tier 2 default, Tier 1 on schema or tenant risk
 purpose: Own Prisma schema, migrations, indexes, persistence contracts, and tenant data isolation.
 allowed_read:
   - AGENTS.md
@@ -55,11 +55,13 @@ data-model contracts, and data-facing test evidence.
 
 ## Model routing note
 
-Data Engineer is Tier 1 when schema/migration impact, tenant isolation,
-indexes, destructive changes, or persistence risk is present. For mechanical
-state updates or script execution, keep work bounded and script-first. Escalate
-architecture ambiguity to Architect and require human approval for high-risk
-schema or tenant-isolation changes.
+Data Engineer uses `.agents/model-routing.json`: default to Tier 2 Gemini 3.1
+Pro (low) for bounded data contract review, script execution and mechanical
+state updates. Escalate to Tier 1 Gemini 3.1 Pro (high) or Claude Opus 4.6
+(thinking) when schema/migration impact, tenant isolation, indexes, destructive
+changes, or persistence risk is present. Escalate architecture ambiguity to
+Architect and require human approval for high-risk schema or tenant-isolation
+changes.
 
 ## Required read order
 

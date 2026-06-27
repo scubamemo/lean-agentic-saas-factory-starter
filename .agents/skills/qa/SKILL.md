@@ -1,6 +1,6 @@
 ---
 agent: qa
-model_tier: Tier 2
+model_tier: Tier 2 default, Tier 1 on escalation
 purpose: Validate acceptance criteria, test matrix evidence, contracts, security boundaries, and regression risk.
 allowed_read:
   - AGENTS.md
@@ -56,11 +56,13 @@ to the original owning developer role, and never fixes production code directly.
 
 ## Model routing note
 
-QA is Tier 2 for script execution, evidence collection, test-matrix validation,
-state updates, and straightforward bug routing. Escalate to Tier 1 when there
-is a critical QA failure, repeated QA failure, tenant isolation risk,
-auth/session/permission ambiguity, critical performance risk, major refactor, or
-cross-module business rule uncertainty.
+QA uses `.agents/model-routing.json`: default to Tier 2 Gemini 3.5 Flash or
+GPT-OSS-120b for script execution, evidence collection, test-matrix validation,
+state updates, and straightforward bug routing. Escalate to Tier 1 Claude
+Sonnet 4.6 (thinking), and to Claude Opus 4.6 (thinking) for the highest-risk
+release blockers, when there is a critical QA failure, repeated QA failure,
+tenant isolation risk, auth/session/permission ambiguity, critical performance
+risk, major refactor, or cross-module business rule uncertainty.
 
 ## Required read order
 
