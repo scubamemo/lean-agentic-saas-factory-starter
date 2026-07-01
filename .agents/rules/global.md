@@ -8,6 +8,8 @@
 - Update contracts and handoff when behavior changes.
 - Prefer small, complete tasks over broad refactors.
 - Use module docs before reading code.
+- **Script-first execution**: Run automated check scripts before performing manual code reviews.
+- **Hash-based standard verification**: Use the hash-based checks with `template-structure-cache.json` to bypass reading full standards unless needed.
 
 ## Never by default
 
@@ -16,6 +18,12 @@
 - Changing factory standards during product feature work.
 - Inventing product behavior when requirements are unclear.
 - Reading broad `docs/**` when a module contract answers the question.
+
+## Efficiency and Model Tiering
+
+- Run local scripts first to minimize context usage.
+- Prefer `Tier 2` models for simple implementation tasks to save reasoning tokens.
+- Maintain rolling summaries in `history-summary.json` instead of reading old handoff histories.
 
 ## Escalation allowed
 

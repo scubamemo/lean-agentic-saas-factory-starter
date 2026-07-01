@@ -2,6 +2,13 @@
 
 Use the smallest context that can complete the task.
 
+## Lazy-loading context
+
+- Always load context incrementally.
+- Use `history-summary.json` for rolling updates of completed tasks.
+- **never read historical handoff.md** files or completed work order markdown files.
+- Run **node scripts/check-template-cache.mjs** to verify standard layout hashes before reading standard files.
+
 ## Default rule
 
 Read `project/CONTEXT.md` and the target module `context.md` before reading longer docs or implementation files.
