@@ -1,4 +1,3 @@
-# Workflow - Feature Development
 # Feature Development Workflow
 
 Feature work follows `.agents/workflows/cyclic-development.md` and orchestrates

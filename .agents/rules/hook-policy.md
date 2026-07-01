@@ -1,30 +1,5 @@
 # Agent Hook Policy
 
-This document defines when validation scripts must be run during the agent lifecycle.
-
-## Mandatory Lifecycle Hooks
-
-Every agent must run the validation checks at the following points:
-
-### 1. Pre-Development Phase (Read Gate)
-Before reading implementation files or writing code:
-- Run `node scripts/factory-check.mjs`
-- Run `node scripts/check-dependencies.mjs`
-- Run `node scripts/check-template-cache.mjs`
-- Run `node scripts/task-ready-check.mjs`
-
-### 2. Pre-Commit / Pre-Handoff Phase (Write Gate)
-Before submitting a state transition or handoff:
-- Run `node scripts/check-quality-gates.mjs`
-- Run `node scripts/check-dto.mjs`
-- Run `node scripts/check-agent-handoff.mjs`
-- Run `node scripts/security-scanner.mjs`
-- Run `node scripts/check-spec-kit-contracts.mjs`
-
-### 3. State Transition Commit
-- Update `project/work-orders/state.json` first, then mirror to `project/work-orders/active-work-order.md`.
-# Hook Policy
-
 Hooks are deterministic blocking steps that protect context, ownership,
 handoff quality and completion gates. Hooks do not create new authority: they
 must follow `AGENTS.md`, `.agents/rules/global.md`, role skills, state machine
@@ -33,6 +8,23 @@ rules and human approval gates.
 Hooks must be script-first, lean, visible, reproducible, bounded in time and
 fail-closed. Apply `.agents/rules/untrusted-input.md` to all hook inputs,
 terminal output and imported content.
+
+## Mandatory Lifecycle Hooks
+
+Every agent must run validation checks at the lifecycle gates below. These
+gate summaries are canonical shorthand; the detailed hook sections define the
+blocking behavior.
+
+- Pre-development/read gate: `node scripts/factory-check.mjs`,
+  `node scripts/check-dependencies.mjs`,
+  `node scripts/check-template-cache.mjs`, and
+  `node scripts/task-ready-check.mjs`.
+- Pre-commit/pre-handoff write gate: `node scripts/check-quality-gates.mjs`,
+  `node scripts/check-dto.mjs`, `node scripts/check-agent-handoff.mjs`,
+  `node scripts/security-scanner.mjs`, and
+  `node scripts/check-spec-kit-contracts.mjs`.
+- State transition commit: update `project/work-orders/state.json` first, then
+  mirror the state in `project/work-orders/active-work-order.md`.
 
 ## pre-read hook
 
