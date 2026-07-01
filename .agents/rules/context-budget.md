@@ -84,6 +84,12 @@ original artifacts and traces; agents consume only the compact summary.
 
 Use the smallest context that can complete the task.
 
+## Lazy-loading context
+
+- Always load context incrementally.
+- Use `history-summary.json` for rolling updates of completed tasks.
+- **never read historical handoff.md** files or completed work order markdown files.
+- Run **node scripts/check-template-cache.mjs** to verify standard layout hashes before reading standard files.
 ## Delta-only state writing
 
 State updates must be minimal and explicit. Agents must not regenerate the full

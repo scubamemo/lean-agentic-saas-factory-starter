@@ -66,6 +66,8 @@ replaces repeated broad reads. Previous-step context comes only from
 - Update contracts and handoff when behavior changes.
 - Prefer small, complete tasks over broad refactors.
 - Use module docs before reading code.
+- **Script-first execution**: Run automated check scripts before performing manual code reviews.
+- **Hash-based standard verification**: Use the hash-based checks with `template-structure-cache.json` to bypass reading full standards unless needed.
 - Never create, paste, expose, commit or preserve credentials, tokens, private
   keys, passwords, bearer tokens, API keys or secret values. Use environment
   variable names, placeholders such as `<TOKEN>`, or clearly fake examples
@@ -129,6 +131,12 @@ Approval is valid only after a human manually changes `state.json` to include
 `status=APPROVED`, `approved_by=human:<name>`, and at least one approval note.
 Agents cannot self-approve, cannot infer approval from chat text, and cannot
 clear `approval_required` on their own.
+
+## Efficiency and Model Tiering
+
+- Run local scripts first to minimize context usage.
+- Prefer `Tier 2` models for simple implementation tasks to save reasoning tokens.
+- Maintain rolling summaries in `history-summary.json` instead of reading old handoff histories.
 
 ## Escalation allowed
 

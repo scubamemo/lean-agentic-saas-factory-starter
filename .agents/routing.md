@@ -31,6 +31,15 @@ or Architect with the exact missing decision.
 | review | code-reviewer | qa | changed files + contracts |
 | release | qa | code-reviewer | test matrix + handoff |
 
+## Model Tiering Matrix
+
+To optimize reasoning costs, agents are routed according to task complexity:
+- **Tier 1** (High reasoning: Gemini 1.5 Pro, etc.): Reserved for planning, code review, architectural design, database migration safety analysis, and security checks.
+- **Tier 2** (Fast/cheap: Gemini 1.5 Flash, etc.): Default for PM updates, boilerplate implementation, test execution, and running scripts. Use **cheap models** for all routine tasks.
+
+## Module Generation Routing
+
+- To generate new modules, run **scripts/new-module.mjs** rather than manually structuring folders.
 ## Role context packs
 
 - Backend Developer: backend contract set plus explicitly named backend files.
