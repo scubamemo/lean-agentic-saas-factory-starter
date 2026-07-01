@@ -1,5 +1,7 @@
 # Agentic SaaS Factory Starter
 
+Türkçe sürüm: `README.tr.md` ve `START-HERE.tr.md`.
+
 A generic, reusable SaaS factory starter optimized for Google Antigravity-style
 agents and other multi-agent coding tools.
 
