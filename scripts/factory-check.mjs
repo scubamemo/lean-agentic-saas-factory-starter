@@ -3,382 +3,408 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const root = process.cwd();
-let failed = false;
+const results = [];
 
-function fail(message) { console.error(`FAIL: ${message}`); failed = true; }
-function ok(message) { console.log(`OK: ${message}`); }
-function exists(rel) { return fs.existsSync(path.join(root, rel)); }
-function read(rel) { return exists(rel) ? fs.readFileSync(path.join(root, rel), 'utf8') : ''; }
-function normalize(rel) { return rel.replaceAll('\\', '/'); }
-function walk(dir) {
+function relPath(...parts) {
+  return path.join(root, ...parts);
+}
+function exists(rel) {
+  return fs.existsSync(relPath(rel));
+}
+function read(rel) {
+  return exists(rel) ? fs.readFileSync(relPath(rel), 'utf8') : '';
+}
+function readJson(rel) {
+  try {
+    return JSON.parse(read(rel));
+  } catch (error) {
+    throw new Error(`${rel} invalid JSON: ${error.message}`);
+  }
+}
+function listDirs(rel) {
+  const dir = relPath(rel);
   if (!fs.existsSync(dir)) return [];
-  const out = [];
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (['node_modules','.git','dist','build','.next','coverage'].includes(entry.name)) continue;
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) out.push(...walk(full));
-    else out.push(full);
-  }
-  return out;
+  return fs.readdirSync(dir, { withFileTypes: true })
+    .filter(entry => entry.isDirectory())
+    .map(entry => entry.name)
+    .sort();
 }
-function moduleDirs() {
-  const modulesRoot = path.join(root, 'project/modules');
-  if (!fs.existsSync(modulesRoot)) return [];
-  return fs.readdirSync(modulesRoot, { withFileTypes: true })
-    .filter(d => d.isDirectory() && d.name !== '_template')
-    .map(d => d.name);
+function record(status, name, detail = '') {
+  results.push({ status, name, detail });
 }
-function hasStrictApiContract(text) {
-  return /openapi:\s*3\.1\.0/.test(text) || /"openapi"\s*:\s*"3\.1\.0"/.test(text) || /\$schema\s*:/.test(text) || /"\$schema"\s*:/.test(text);
-}
-function extractOpenApiEndpoints(contractText) {
-  const endpoints = [];
-  const lines = contractText.split(/\r?\n/);
-  let inPaths = false;
-  let currentPath = null;
-  for (const line of lines) {
-    if (/^paths:\s*$/.test(line.trim())) { inPaths = true; continue; }
-    if (inPaths && /^components:\s*$/.test(line.trim())) break;
-    if (!inPaths) continue;
-    const pathMatch = line.match(/^\s{2}(\/[^:]+):\s*$/);
-    if (pathMatch) { currentPath = pathMatch[1].trim(); continue; }
-    const methodMatch = line.match(/^\s{4}(get|post|put|patch|delete):\s*$/i);
-    if (currentPath && methodMatch) endpoints.push({ method: methodMatch[1].toUpperCase(), path: currentPath, operationId: '' });
-    const opMatch = line.match(/^\s{6}operationId:\s*([A-Za-z0-9_]+)/);
-    if (opMatch && endpoints.length > 0) endpoints[endpoints.length - 1].operationId = opMatch[1];
-  }
-  return endpoints;
-}
-function implementationTextForModule(moduleName) {
-  const dir = path.join(root, 'backend/src/modules', moduleName);
-  if (!fs.existsSync(dir)) return '';
-  return walk(dir).filter(f => /\.(ts|tsx|js|mjs|cjs)$/.test(f)).map(f => fs.readFileSync(f, 'utf8')).join('\n');
-}
-function endpointLooksImplemented(endpoint, implText, moduleName) {
-  if (!implText) return true;
-  const methodDecorator = { GET: '@Get', POST: '@Post', PUT: '@Put', PATCH: '@Patch', DELETE: '@Delete' }[endpoint.method];
-  const pathWithoutApi = endpoint.path.replace(/^\/api\/?/, '').replace(/\{([^}]+)\}/g, ':$1');
-  const moduleBase = endpoint.path.split('/').filter(Boolean).at(-1) ?? moduleName;
-  const routeTail = pathWithoutApi.replace(new RegExp(`^${moduleName}/?`), '').replace(/^\/?/, '');
-  const candidates = [endpoint.path, pathWithoutApi, endpoint.operationId, moduleBase].filter(Boolean);
-  if (candidates.some(c => implText.includes(c))) return true;
-  if (methodDecorator && implText.includes(methodDecorator)) {
-    if (!routeTail || implText.includes(`'${routeTail}'`) || implText.includes(`"${routeTail}"`) || implText.includes(`\`${routeTail}\``) || implText.includes(`Controller('${moduleName}`) || implText.includes(`Controller("${moduleName}`)) return true;
-  }
-  return false;
-}
-function scanDirectImports() {
-  const sourceFiles = walk(root).filter(file => /\.(ts|tsx|js|jsx|mjs|cjs)$/.test(file));
-  const importRe = /(?:import\s+(?:type\s+)?(?:[^'";]+\s+from\s+)?|export\s+[^'";]+\s+from\s+|require\()(['"])([^'"]+)\1/g;
-  for (const file of sourceFiles) {
-    const rel = normalize(path.relative(root, file));
-    if (rel.startsWith('scripts/')) continue;
-    if (rel.startsWith('frontend/')) {
-      const text = fs.readFileSync(file, 'utf8');
-      for (const m of text.matchAll(importRe)) {
-        const spec = m[2];
-        if (spec.includes('backend') || spec.startsWith('../backend') || spec.startsWith('../../backend') || spec.startsWith('@/../backend')) fail(`Frontend file imports backend directly: ${rel} -> ${spec}`);
-      }
-    }
-    if (rel.startsWith('backend/')) {
-      const text = fs.readFileSync(file, 'utf8');
-      for (const m of text.matchAll(importRe)) {
-        const spec = m[2];
-        if (spec.includes('frontend') || spec.startsWith('../frontend') || spec.startsWith('../../frontend') || spec.startsWith('@/../frontend')) fail(`Backend file imports frontend directly: ${rel} -> ${spec}`);
-      }
-    }
+function check(name, fn) {
+  try {
+    fn();
+    record('OK', name);
+  } catch (error) {
+    record('FAIL', name, error.message);
   }
 }
-
-const requiredFiles = [
-  'START-HERE.md','AGENTS.md','project/PROJECT.md','project/UI.md','project/MODULES.md','project/CONTEXT.md','project/work-orders/state.json','project/work-orders/state.schema.json','project/work-orders/history-summary.json','project/work-orders/template-structure-cache.json','project/work-orders/active-work-order.md',
-  'project/modules/_template/MODULE.md','project/modules/_template/context.md','project/modules/_template/api.contract.md','project/modules/_template/dto.md','project/modules/_template/data-model.md','project/modules/_template/permissions.md','project/modules/_template/ui.contract.md','project/modules/_template/test-matrix.md','project/modules/_template/handoff.md',
-  '.agents/rules/global.md','.agents/rules/context-budget.md','.agents/rules/guardrails.md','.agents/rules/mcp-communication.md','.agents/routing.md','.agents/workflows/cyclic-development.md','.agents/skills/data-engineer/SKILL.md','factory/quality-gates.md','docs/patterns/common-feature-patterns.md','examples/golden/sample-resource-module/MODULE.md','examples/golden/sample-resource-module/api.contract.md','examples/golden/sample-resource-module/ui.contract.md','examples/golden/sample-resource-module/test-matrix.md','examples/golden/sample-resource-module/handoff.md','scripts/task-ready-check.mjs','scripts/check-dto.mjs','scripts/check-contract-artifacts.mjs','scripts/check-dependencies.mjs','scripts/check-template-cache.mjs','scripts/check-quality-gates.mjs','scripts/check-spec-kit-contracts.mjs','scripts/trace-logger.mjs','scripts/security-scanner.mjs','scripts/new-module.mjs','scripts/new-work-order.mjs','project/work-orders/bugfix.md','frontend/src/components/COMPONENTS.md','packages/contracts/README.md','packages/contracts/src/index.ts','packages/contracts/spec-kit.module.schema.json','packages/contracts/specs/_template.spec.json','packages/contracts/specs/sample-resource.spec.json','factory/dependency-cruiser.cjs','.dependency-cruiser.cjs','docs/standards/software-craftsmanship.md','docs/standards/backend-engineering-quality.md','docs/standards/frontend-engineering-quality.md','docs/standards/testing-quality-bar.md','docs/standards/code-review-quality-bar.md'
-];
-for (const rel of requiredFiles) if (!exists(rel)) fail(`Missing required file: ${rel}`);
-if (!failed) ok('required files are present');
-
-try {
-  const config = JSON.parse(read('project/project.config.json'));
-  const profiles = ['poc', 'mvp', 'production', 'enterprise'];
-  if (!profiles.includes(config.profile)) fail(`Invalid project profile: ${config.profile}`);
-  if (!config.tenancyMode) fail('project.config.json must define tenancyMode');
-  if (config.mcpStructuredHandoffs !== true) fail('project.config.json must enable mcpStructuredHandoffs');
-  if (config.dataEngineerOwnsPrisma !== true) fail('project.config.json must set dataEngineerOwnsPrisma=true');
-  if (!failed) ok('project config is valid enough');
-} catch (error) { fail(`project/project.config.json is invalid JSON: ${error.message}`); }
-
-try {
-  const state = JSON.parse(read('project/work-orders/state.json'));
-  if (state.schema !== 'agentic.factory.WorkOrderState.v4') fail('state.json must use agentic.factory.WorkOrderState.v4');
-  if (!state.last_updated_by) fail('state.json must include last_updated_by');
-  if (!Array.isArray(state.validation_errors)) fail('state.json must include validation_errors array');
-  if (state.mcp?.source_of_truth !== 'project/work-orders/state.json') fail('state.json must declare itself as MCP source of truth');
-  if (state.mcp?.lazy_context_required !== true) fail('state.json must enforce lazy_context_required=true');
-  if (state.history_summary !== 'project/work-orders/history-summary.json') fail('state.json must point to history-summary.json');
-  if (state.template_cache !== 'project/work-orders/template-structure-cache.json') fail('state.json must point to template-structure-cache.json');
-  if (state.delta_policy?.delta_only_writing !== true) fail('state.json must enable delta-only writing');
-  if (!state.agent_payloads?.ui_status || !state.agent_payloads?.backend_status || !state.agent_payloads?.qa_status) fail('state.json must define role-scoped agent_payloads');
-  if (!state.quality_gates || typeof state.quality_gates.dto_check_passed !== 'boolean') fail('state.json must include quality_gates.dto_check_passed');
-  if (!state.quality_gates || typeof state.quality_gates.template_cache_valid !== 'boolean') fail('state.json must include quality_gates.template_cache_valid');
-  if (!state.allowed_transitions?.PLANNED?.includes('IN_PROGRESS')) fail('state.json must allow PLANNED -> IN_PROGRESS');
-  if (!state.allowed_transitions?.IN_PROGRESS?.includes('VALIDATION_REQUIRED')) fail('state.json must allow IN_PROGRESS -> VALIDATION_REQUIRED');
-  if (!state.allowed_transitions?.VALIDATION_REQUIRED?.includes('QA_PENDING') || !state.allowed_transitions?.VALIDATION_REQUIRED?.includes('FAILED')) fail('state.json must allow VALIDATION_REQUIRED -> QA_PENDING / FAILED');
-  if (!state.allowed_transitions?.QA_PENDING?.includes('FAILED') || !state.allowed_transitions?.QA_PENDING?.includes('COMPLETED') || !state.allowed_transitions?.QA_PENDING?.includes('APPROVED')) fail('state.json must allow QA_PENDING -> APPROVED / FAILED / COMPLETED');
-  if (!state.allowed_transitions?.APPROVED?.includes('COMPLETED')) fail('state.json must allow APPROVED -> COMPLETED');
-  if (typeof state.approval_required !== 'boolean') fail('state.json must include approval_required boolean');
-  if (state.observability?.trace_required_before_completion !== true) fail('state.json must require trace logging before completion');
-  for (const gate of ['spec_kit_contracts_valid','security_scan_passed','trace_logged']) if (typeof state.quality_gates?.[gate] !== 'boolean') fail(`state.json must include quality_gates.${gate}`);
-  if (!failed) ok('work-order state.json is structurally valid');
-} catch (error) { fail(`project/work-orders/state.json is invalid JSON: ${error.message}`); }
-
-try {
-  const history = JSON.parse(read('project/work-orders/history-summary.json'));
-  if (history.schema !== 'agentic.factory.HistorySummary.v1') fail('history-summary.json must use agentic.factory.HistorySummary.v1');
-  if (!Array.isArray(history.structural_deltas)) fail('history-summary.json must contain structural_deltas array');
-  const serialized = JSON.stringify(history);
-  if (serialized.length > 12000) fail('history-summary.json is too large; compact historical context before continuing');
-  if (!failed) ok('rolling history summary is compact and structured');
-} catch (error) { fail(`project/work-orders/history-summary.json is invalid JSON: ${error.message}`); }
-
-try {
-  const cache = JSON.parse(read('project/work-orders/template-structure-cache.json'));
-  if (cache.schema !== 'agentic.factory.TemplateStructureCache.v1') fail('template-structure-cache.json must use agentic.factory.TemplateStructureCache.v1');
-  if (!cache.template_structure_hash || !Array.isArray(cache.required_files)) fail('template-structure-cache.json must include template_structure_hash and required_files');
-  if (!failed) ok('template structure cache is present');
-} catch (error) { fail(`project/work-orders/template-structure-cache.json is invalid JSON: ${error.message}`); }
-
-const workOrder = read('project/work-orders/active-work-order.md');
-for (const heading of ['## State source of truth','## ID','## Task type','## Status','## Context mode','## Target module','## Goal','## Acceptance criteria','## Security / tenancy trigger','## Must read','## Read by role','## Allowed write paths','## Forbidden paths by default','## State Transition DTO']) {
-  if (!workOrder.includes(heading)) fail(`active work order missing heading: ${heading}`);
+function requireFiles(files) {
+  const missing = files.filter(rel => !exists(rel));
+  if (missing.length > 0) throw new Error(`missing: ${missing.join(', ')}`);
 }
-if (!workOrder.includes('project/work-orders/state.json')) fail('active work order must point to state.json as primary source of truth');
-if (!workOrder.includes('.agents/rules/mcp-communication.md')) fail('active work order must reference MCP communication rule');
-if (!workOrder.includes('Data Engineer:')) fail('active work order must include Data Engineer read set');
-if (!workOrder.includes('history-summary.json')) fail('active work order must point to history-summary.json for historical context');
-if (!workOrder.includes('Delta-only writing')) fail('active work order must document delta-only writing');
-for (const phrase of ['node scripts/factory-check.mjs','node scripts/check-contract-artifacts.mjs','node scripts/check-dependencies.mjs','node scripts/task-ready-check.mjs']) {
-  if (!workOrder.includes(phrase)) fail(`active work order missing pre-development/handoff control phrase: ${phrase}`);
-}
-if (!failed) ok('active work order has required headings and validation gates');
-
-const goldenDir = path.join(root, 'examples/golden/sample-resource-module');
-const goldenArtifacts = fs.existsSync(goldenDir) ? fs.readdirSync(goldenDir).filter(name => fs.statSync(path.join(goldenDir, name)).isFile()) : [];
-for (const artifact of goldenArtifacts) {
-  if (!exists(`project/modules/_template/${artifact}`)) fail(`Module template missing golden artifact: ${artifact}`);
-}
-for (const moduleName of moduleDirs()) {
-  for (const artifact of goldenArtifacts) {
-    if (!exists(`project/modules/${moduleName}/${artifact}`)) fail(`Module ${moduleName} missing golden artifact: ${artifact}`);
-  }
-}
-if (!failed) ok('module artifacts adhere to golden sample structure');
-
-const allModuleLike = ['_template', ...moduleDirs()];
-for (const moduleName of allModuleLike) {
-  const rel = `project/modules/${moduleName}/api.contract.md`;
-  const contract = read(rel);
-  if (!contract) continue;
-  if (!hasStrictApiContract(contract)) fail(`${rel} must contain OpenAPI 3.1 or JSON Schema`);
-  const implText = moduleName === '_template' ? '' : implementationTextForModule(moduleName);
-  if (implText) {
-    const endpoints = extractOpenApiEndpoints(contract);
-    if (endpoints.length === 0) fail(`${rel} defines implementation-backed module but no OpenAPI endpoints were found`);
-    for (const endpoint of endpoints) {
-      if (!endpointLooksImplemented(endpoint, implText, moduleName)) fail(`API contract mismatch for module ${moduleName}: ${endpoint.method} ${endpoint.path} not found in backend implementation`);
-    }
-  }
-}
-if (!failed) ok('API contracts are strict and implementation alignment checks passed');
-
-const handoff = read('project/modules/_template/handoff.md');
-for (const phrase of ['Current status','Current dependencies','Next agent','Artifact sync','State Transition DTO','agentic.factory.StateTransition.v1']) {
-  if (!handoff.includes(phrase)) fail(`module handoff missing required phrase: ${phrase}`);
-}
-if (!failed) ok('module handoff uses structured DTO and artifact protocol');
-
-const uiContract = read('project/modules/_template/ui.contract.md');
-for (const section of ['## Design system constraints','## Routes / pages','## Components','## Mock scenarios','## Visual QA expectations']) {
-  if (!uiContract.includes(section)) fail(`ui.contract.md missing consolidated section: ${section}`);
-}
-if (!failed) ok('consolidated UI contract has required sections');
-
-const contractsReadme = read('packages/contracts/README.md');
-for (const phrase of ['mandatory source of truth','must not duplicate business logic','public data models','DTOs']) {
-  if (!contractsReadme.toLowerCase().includes(phrase.toLowerCase())) fail(`packages/contracts/README.md missing SoT phrase: ${phrase}`);
-}
-if (!failed) ok('packages/contracts is documented as mandatory source of truth');
-
-const guardrails = read('.agents/rules/guardrails.md');
-for (const phrase of ['Directory Authorization Matrix','Frontend Developers must never write','backend/prisma/','packages/contracts/','Backend Developers must never write','Pre-Write Check','ad-hoc global CSS']) {
-  if (!guardrails.includes(phrase)) fail(`guardrails missing required phrase: ${phrase}`);
-}
-if (!failed) ok('guardrails include directory RBAC');
-
-const de = read('.agents/skills/data-engineer/SKILL.md');
-for (const phrase of ['backend/prisma/schema.prisma','Prisma Guard','createdAt','updatedAt','tenantId','Raw query safety','data-model.md','dto.md']) {
-  if (!de.includes(phrase)) fail(`data engineer skill missing required phrase: ${phrase}`);
-}
-if (!failed) ok('data engineer skill covers schema guardrails');
-
-const mcp = read('.agents/rules/mcp-communication.md');
-for (const phrase of ['Artifact Protocol','State Transition Schema','Task-focused MCP context loading','Lazy-loading context']) {
-  if (!mcp.includes(phrase)) fail(`MCP communication rule missing phrase: ${phrase}`);
-}
-if (!failed) ok('MCP communication rule includes artifact protocol');
-
-const cyclic = read('.agents/workflows/cyclic-development.md');
-for (const phrase of ['Plan -> Backend -> Frontend', 'VALIDATION_REQUIRED', 'project/work-orders/bugfix.md', 'No feature is `COMPLETED`']) {
-  if (!cyclic.includes(phrase)) fail(`cyclic workflow missing phrase: ${phrase}`);
-}
-if (!failed) ok('cyclic workflow includes QA feedback loop');
-
-const frontendStandards = read('docs/standards/frontend-standards.md');
-for (const phrase of ['Tailwind','Shadcn','ad-hoc CSS','frontend/src/components/COMPONENTS.md','packages/contracts/','must not duplicate business logic']) {
-  if (!frontendStandards.includes(phrase)) fail(`frontend standards missing phrase: ${phrase}`);
-}
-if (!failed) ok('frontend standards enforce design system and contract SoT');
-
-const backendStandards = read('docs/standards/backend-standards.md');
-for (const phrase of ['packages/contracts/','mandatory source of truth','must not duplicate business logic','api.contract.md']) {
-  if (!backendStandards.includes(phrase)) fail(`backend standards missing phrase: ${phrase}`);
-}
-if (!failed) ok('backend standards enforce contract SoT');
-
-scanDirectImports();
-if (!failed) ok('frontend/backend direct import boundary checks passed');
-
-const componentCatalog = read('frontend/src/components/COMPONENTS.md');
-for (const phrase of ['Component creation protocol','Scan existing components','reuse it','refactor','Do not use hardcoded inline styles']) {
-  if (!componentCatalog.includes(phrase)) fail(`component catalog missing design-system constraint phrase: ${phrase}`);
-}
-if (!failed) ok('component catalog enforces reuse before new components');
-
-const removedSplitUiReferences = [
-  'components.contract.md','routes.contract.md','mock-data.md','visual-qa-checklist.md',
-  'project/ui/component-inventory.md','docs/standards/design-system-contract.md','docs/standards/mock-api-standard.md','contracts/mock-data.md'
-];
-const allowedReferenceFiles = new Set(['scripts/factory-check.mjs']);
-for (const file of walk(root)) {
-  const relPath = normalize(path.relative(root, file));
-  if (relPath.startsWith('.factory-meta/')) continue;
-  if (relPath.startsWith('scripts/') && relPath !== 'scripts/factory-check.mjs') continue;
-  if (!/\.(md|txt|json|ts|tsx|mjs|js|yml|yaml|prisma|example)$/.test(relPath)) continue;
-  const text = fs.readFileSync(file, 'utf8');
-  for (const removed of removedSplitUiReferences) {
-    if (text.includes(removed) && !allowedReferenceFiles.has(relPath)) fail(`Stale split-UI reference '${removed}' in ${relPath}; use ui.contract.md instead`);
-  }
-}
-if (!failed) ok('no stale split-UI references in operational files');
-
-const prohibitedTemplateTerms = ['stock management','inventory management','warehouse management'];
-for (const file of walk(root)) {
-  const relPath = normalize(path.relative(root, file));
-  if (relPath.startsWith('scripts/')) continue;
-  if (relPath.startsWith('.factory-meta/')) continue;
-  if (!/\.(md|json|ts|tsx|mjs|js|yml|yaml|prisma|example)$/.test(relPath)) continue;
-  const text = fs.readFileSync(file, 'utf8').toLowerCase();
-  for (const term of prohibitedTemplateTerms) if (text.includes(term)) fail(`Potential domain leakage '${term}' in ${relPath}`);
-}
-if (!failed) ok('no obvious template domain leakage');
-
-
-
-const leanStandard = read('docs/standards/lean-agentic-development.md');
-for (const phrase of ['check-dependencies.mjs', 'Dependency cruising', 'state.json is the single source of truth', 'packages/contracts/','Hash-based standard verification','template-structure-cache.json']) {
-  if (!leanStandard.includes(phrase)) fail(`lean-agentic-development standard missing phrase: ${phrase}`);
-}
-
-const newModuleWorkflow = read('.agents/workflows/new-module.md');
-const featureWorkflow = read('.agents/workflows/feature-development.md');
-for (const [name, text] of [['new-module workflow', newModuleWorkflow], ['feature-development workflow', featureWorkflow]]) {
-  for (const phrase of ['node scripts/factory-check.mjs', 'node scripts/check-dependencies.mjs', 'node scripts/check-template-cache.mjs', 'project/work-orders/state.json']) {
-    if (!text.includes(phrase)) fail(`${name} missing blocking phrase: ${phrase}`);
-  }
-}
-
-for (const skill of walk(path.join(root, '.agents/skills')).filter(f => f.endsWith('SKILL.md'))) {
-  const rel = normalize(path.relative(root, skill));
-  const text = fs.readFileSync(skill, 'utf8');
-  for (const phrase of ['Deterministic state and strict gatekeeping', 'Script-first execution rule', 'project/work-orders/state.json', 'node scripts/factory-check.mjs', 'node scripts/check-dependencies.mjs']) {
-    if (!text.includes(phrase)) fail(`${rel} missing strict gatekeeping phrase: ${phrase}`);
-  }
-}
-
-
-
-const routing = read('.agents/routing.md');
-for (const phrase of ['Model Tiering Matrix','Tier 1','Tier 2','scripts/new-module.mjs','cheap models']) {
-  if (!routing.includes(phrase)) fail(`routing.md missing model tiering phrase: ${phrase}`);
-}
-const globalRules = read('.agents/rules/global.md');
-for (const phrase of ['Script-first execution','Hash-based standard verification','template-structure-cache.json','history-summary.json','Tier 2']) {
-  if (!globalRules.includes(phrase)) fail(`global rules missing token-saving phrase: ${phrase}`);
-}
-const contextBudget = read('.agents/rules/context-budget.md');
-for (const phrase of ['Lazy-loading context','history-summary.json','never read historical handoff.md','node scripts/check-template-cache.mjs']) {
-  if (!contextBudget.includes(phrase)) fail(`context-budget.md missing lazy context phrase: ${phrase}`);
-}
-
-
-
-const qualityStandards = [
-  ['docs/standards/software-craftsmanship.md', ['SOLID','DRY','KISS','YAGNI','Pattern selection rules']],
-  ['docs/standards/backend-engineering-quality.md', ['Controller / route','Service / use case','tenant context','Backend testing expectations']],
-  ['docs/standards/frontend-engineering-quality.md', ['Design system enforcement','Component architecture','Accessibility bar','Frontend testing expectations']],
-  ['docs/standards/testing-quality-bar.md', ['test-matrix.md','happy path','tenant isolation','QA failure routing']],
-  ['docs/standards/code-review-quality-bar.md', ['Craftsmanship review rubric','Blocking review criteria','Overengineering detection']]
-];
-for (const [rel, phrases] of qualityStandards) {
+function requirePhrases(rel, phrases) {
   const text = read(rel);
-  for (const phrase of phrases) if (!text.includes(phrase)) fail(`${rel} missing engineering quality phrase: ${phrase}`);
+  if (!text) throw new Error(`missing: ${rel}`);
+  const missing = phrases.filter(phrase => !text.includes(phrase));
+  if (missing.length > 0) throw new Error(`${rel} missing: ${missing.join(', ')}`);
 }
-for (const skill of walk(path.join(root, '.agents/skills')).filter(f => f.endsWith('SKILL.md'))) {
-  const rel = normalize(path.relative(root, skill));
-  const text = fs.readFileSync(skill, 'utf8');
-  if (!text.includes('Script-first execution rule')) fail(`${rel} missing script-first rule`);
-  if (!text.includes('Deterministic state and strict gatekeeping')) fail(`${rel} missing strict gatekeeping rule`);
+function summarizeOutput(output) {
+  return output
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(Boolean)
+    .filter(line => /^(FAIL|ERROR|Error|Missing|Invalid|Cannot)\b/.test(line))
+    .slice(0, 6)
+    .join('; ');
 }
-if (!read('docs/standards/lean-agentic-development.md').includes('Engineering excellence with lazy standards')) fail('lean-agentic-development.md missing lazy engineering excellence section');
-if (!failed) ok('engineering excellence standards and skill gates are present');
-
-
-function runBlockingScript(rel) {
-  const result = spawnSync(process.execPath, [rel], { cwd: root, encoding: 'utf8' });
-  if (result.status === 0) {
-    ok(`${rel} passed`);
-  } else {
-    const output = `${result.stdout ?? ''}\n${result.stderr ?? ''}`.trim();
-    fail(`${rel} failed${output ? `:\n${output}` : ''}`);
+function runScript(name, rel, { optional = false, when = true } = {}) {
+  if (!when) {
+    record('SKIP', name, 'condition not met');
+    return;
   }
+  if (!exists(rel)) {
+    if (optional) record('SKIP', name, `${rel} not present`);
+    else record('FAIL', name, `missing script: ${rel}`);
+    return;
+  }
+  const result = spawnSync(process.execPath, [rel], {
+    cwd: root,
+    encoding: 'utf8',
+    env: { ...process.env, NO_COLOR: '1' },
+    maxBuffer: 1024 * 1024
+  });
+  if (result.status === 0) {
+    record('OK', name);
+    return;
+  }
+  const output = `${result.stdout ?? ''}\n${result.stderr ?? ''}`;
+  record('FAIL', name, summarizeOutput(output) || `${rel} exited ${result.status}`);
 }
 
-runBlockingScript('scripts/check-spec-kit-contracts.mjs');
-runBlockingScript('scripts/security-scanner.mjs');
+check('required root files', () => {
+  requireFiles([
+    'README.md',
+    'START-HERE.md',
+    'AGENTS.md',
+    'package.json',
+    'pnpm-workspace.yaml',
+    '.agents/model-routing.json',
+    'project/project.config.json',
+    'factory/dependency-cruiser.cjs',
+    '.dependency-cruiser.cjs',
+    'scripts/trace-logger.mjs',
+    'project/work-orders/traces/README.md'
+  ]);
+  const pkg = readJson('package.json');
+  if (pkg.scripts?.['check:dependencies'] !== 'node scripts/check-dependencies.mjs') {
+    throw new Error('package.json missing check:dependencies script');
+  }
+  if (pkg.scripts?.['check:security'] !== 'node scripts/security-scanner.mjs') {
+    throw new Error('package.json missing check:security script');
+  }
+  if (pkg.scripts?.trace !== 'node scripts/trace-logger.mjs') {
+    throw new Error('package.json missing trace script');
+  }
+});
 
+check('AGENTS.md', () => {
+  requirePhrases('AGENTS.md', [
+    'project/work-orders/state.json',
+    'project/work-orders/history-summary.json',
+    'Script-first validation rule',
+    'node scripts/factory-check.mjs',
+    'node scripts/security-scanner.mjs',
+    'Do not inspect the full codebase'
+  ]);
+});
 
-for (const rel of [
-  'docs/constitution.md',
-  'project/work-orders/constitution-cache.json',
-  'docs/standards/prompt-injection-safety.md',
-  '.agents/rules/untrusted-input.md',
-  '.agents/rules/hook-policy.md',
-  'packages/contracts/agent-handoff.schema.json',
-  'scripts/check-constitution.mjs',
-  'scripts/check-skill-metadata.mjs',
-  'scripts/check-agent-handoff.mjs',
-  'scripts/check-untrusted-instructions.mjs',
-  'scripts/export-tool-adapter.mjs',
-  'tool-adapters/antigravity/README.md',
-  'tool-adapters/claude-code/CLAUDE.md',
-  'tool-adapters/cursor/.cursor/rules/agentic-factory.mdc',
-  'tool-adapters/cline/.clinerules/agentic-factory.md',
-  'tool-adapters/windsurf/.windsurf/rules/agentic-factory.md',
-  'tool-adapters/copilot/.github/copilot-instructions.md'
-]) {
-  if (!exists(rel)) fail(`tool-adapter/constitution roadmap file missing: ${rel}`);
+check('.agents/rules', () => {
+  requireFiles([
+    '.agents/rules/global.md',
+    '.agents/rules/context-budget.md',
+    '.agents/rules/guardrails.md',
+    '.agents/rules/mcp-communication.md'
+  ]);
+  requirePhrases('.agents/rules/global.md', [
+    'Script-first execution',
+    'node scripts/factory-check.mjs',
+    'node scripts/security-scanner.mjs',
+    'terminal output'
+  ]);
+  requirePhrases('.agents/rules/context-budget.md', [
+    'Script output before inspection',
+    'history-summary.json',
+    'never read historical handoff.md'
+  ]);
+});
+
+check('model routing policy', () => {
+  const routing = readJson('.agents/model-routing.json');
+  if (routing.schema_version !== 'agentic.factory.ModelRouting.v1') {
+    throw new Error('.agents/model-routing.json schema_version mismatch');
+  }
+  if (!routing.default_rule?.includes('Role name alone must not force an expensive model')) {
+    throw new Error('.agents/model-routing.json must state role is not model tier');
+  }
+  for (const tier of ['tier_1', 'tier_2']) {
+    if (!routing.tiers?.[tier]?.models?.length) throw new Error(`missing models for ${tier}`);
+  }
+  const requiredAgents = [
+    'pm',
+    'architect',
+    'designer',
+    'backend-developer',
+    'frontend-developer',
+    'data-engineer',
+    'qa',
+    'code-reviewer'
+  ];
+  for (const agent of requiredAgents) {
+    const config = routing.agents?.[agent];
+    if (!config) throw new Error(`missing model routing for ${agent}`);
+    if (!config.default_tier) throw new Error(`${agent} missing default_tier`);
+    if (!config.tier_2_model) throw new Error(`${agent} missing tier_2_model`);
+    if (!config.tier_1_model) throw new Error(`${agent} missing tier_1_model`);
+  }
+});
+
+check('.agents/skills', () => {
+  const required = [
+    'pm',
+    'architect',
+    'designer',
+    'backend-developer',
+    'frontend-developer',
+    'data-engineer',
+    'qa',
+    'code-reviewer'
+  ];
+  requireFiles(required.map(role => `.agents/skills/${role}/SKILL.md`));
+  for (const role of required) {
+    requirePhrases(`.agents/skills/${role}/SKILL.md`, [
+      'Script-first execution rule',
+      'Do not spend LLM reasoning tokens',
+      'terminal output',
+      'node scripts/factory-check.mjs',
+      'node scripts/security-scanner.mjs'
+    ]);
+  }
+});
+
+check('.agents/workflows', () => {
+  requireFiles([
+    '.agents/workflows/cyclic-development.md',
+    '.agents/workflows/bugfix.md',
+    '.agents/workflows/new-module.md',
+    '.agents/workflows/feature-development.md',
+    '.agents/workflows/specify.md',
+    '.agents/workflows/plan.md',
+    '.agents/workflows/tasks.md',
+    '.agents/workflows/implement.md',
+    '.agents/workflows/validate.md'
+  ]);
+  requirePhrases('.agents/workflows/cyclic-development.md', [
+    'PLANNED',
+    'IN_PROGRESS',
+    'VALIDATION_REQUIRED',
+    'QA_PENDING',
+    'FAILED',
+    'REVISION_IN_PROGRESS',
+    'APPROVED',
+    'COMPLETED',
+    'Plan',
+    'Backend',
+    'Frontend',
+    'QA',
+    'Review',
+    'project/work-orders/bugfix.md',
+    'QA cannot fix implementation',
+    'Reviewer cannot implement fixes',
+    'node scripts/factory-check.mjs',
+    'node scripts/task-ready-check.mjs',
+    'node scripts/check-contract-artifacts.mjs',
+    'node scripts/check-dependencies.mjs',
+    'node scripts/security-scanner.mjs'
+  ]);
+  requirePhrases('.agents/workflows/bugfix.md', [
+    'QA must not fix code',
+    'REVISION_IN_PROGRESS',
+    'project/work-orders/bugfix.md',
+    'State Transition DTO'
+  ]);
+  requirePhrases('.agents/workflows/feature-development.md', [
+    '.agents/workflows/cyclic-development.md',
+    '.agents/workflows/specify.md',
+    '.agents/workflows/plan.md',
+    '.agents/workflows/tasks.md',
+    '.agents/workflows/implement.md',
+    '.agents/workflows/validate.md',
+    'Implementation is blocked until specification, plan and task ownership are',
+    'REVISION_IN_PROGRESS',
+    'project/work-orders/bugfix.md',
+    'QA and Reviewer cannot fix implementation'
+  ]);
+  requirePhrases('.agents/workflows/specify.md', [
+    'business intent',
+    'Do not write backend or frontend implementation',
+    'project/PROJECT.md',
+    'project/MODULES.md',
+    'api.contract.md',
+    'ui.contract.md'
+  ]);
+  requirePhrases('.agents/workflows/plan.md', [
+    'technical plan',
+    'modules affected',
+    'contracts to create or update',
+    'required agents',
+    'risks'
+  ]);
+  requirePhrases('.agents/workflows/tasks.md', [
+    'work orders',
+    'ownership',
+    'state transitions',
+    'implementation as blocked'
+  ]);
+  requirePhrases('.agents/workflows/implement.md', [
+    'script-first',
+    'contract-first',
+    'allowed',
+    'pre-write',
+    'Update affected artifacts'
+  ]);
+  requirePhrases('.agents/workflows/validate.md', [
+    'QA',
+    'Reviewer',
+    'factory-check.mjs',
+    'bugfix.md',
+    'pre-completion'
+  ]);
+});
+
+check('work-order state', () => {
+  requireFiles([
+    'project/work-orders/state.json',
+    'project/work-orders/state.schema.json',
+    'project/work-orders/history-summary.json',
+    'project/work-orders/template-structure-cache.json',
+    'project/work-orders/active-work-order.md'
+  ]);
+  const state = readJson('project/work-orders/state.json');
+  if (state.schema !== 'agentic.factory.WorkOrderState.v4') throw new Error('state.json schema mismatch');
+  if (state.mcp?.source_of_truth !== 'project/work-orders/state.json') throw new Error('state.json source_of_truth mismatch');
+  for (const key of ['approval_required','approved_by','approval_requested_by','approval_reason','approval_notes']) {
+    if (!(key in state)) throw new Error(`state.json missing HITL field: ${key}`);
+  }
+  if (state.approved_by !== null && !String(state.approved_by).startsWith('human:')) throw new Error('state.json approved_by must be null or human:<name>');
+  for (const key of ['pm','architect','designer','backend','frontend','data_engineer','qa','code_reviewer']) {
+    if (!state.agent_payloads?.[key]) throw new Error(`missing agent_payloads.${key}`);
+  }
+  const stateSchema = readJson('project/work-orders/state.schema.json');
+  if (stateSchema.$id !== 'agentic.factory.WorkOrderState.v4') throw new Error('state.schema.json $id mismatch');
+  const history = readJson('project/work-orders/history-summary.json');
+  if (history.schema !== 'agentic.factory.HistorySummary.v1') throw new Error('history-summary schema mismatch');
+  if (!Array.isArray(history.structural_deltas)) throw new Error('history-summary structural_deltas missing');
+});
+
+check('module template artifacts', () => {
+  requireFiles([
+    'project/modules/_template/MODULE.md',
+    'project/modules/_template/context.md',
+    'project/modules/_template/api.contract.md',
+    'project/modules/_template/ui.contract.md',
+    'project/modules/_template/dto.md',
+    'project/modules/_template/data-model.md',
+    'project/modules/_template/permissions.md',
+    'project/modules/_template/test-matrix.md',
+    'project/modules/_template/handoff.md'
+  ]);
+  requirePhrases('project/modules/_template/api.contract.md', ['OpenAPI 3.1']);
+  requirePhrases('project/modules/_template/ui.contract.md', ['Design system constraints']);
+});
+
+check('packages/contracts structure', () => {
+  requireFiles([
+    'packages/contracts/package.json',
+    'packages/contracts/README.md',
+    'packages/contracts/src/index.ts',
+    'packages/contracts/spec-kit.module.schema.json',
+    'packages/contracts/specs/_template.spec.json',
+    'packages/contracts/specs/sample-resource.spec.json'
+  ]);
+  const pkg = readJson('packages/contracts/package.json');
+  if (!pkg.name) throw new Error('packages/contracts/package.json missing name');
+  const schema = readJson('packages/contracts/spec-kit.module.schema.json');
+  if (schema.$id !== 'agentic.factory.SpecKitModuleSpec.v1') throw new Error('spec-kit schema $id mismatch');
+});
+
+check('project modules use template shape', () => {
+  const moduleNames = listDirs('project/modules').filter(name => name !== '_template');
+  for (const moduleName of moduleNames) {
+    requireFiles([
+      `project/modules/${moduleName}/MODULE.md`,
+      `project/modules/${moduleName}/context.md`,
+      `project/modules/${moduleName}/api.contract.md`,
+      `project/modules/${moduleName}/ui.contract.md`,
+      `project/modules/${moduleName}/dto.md`,
+      `project/modules/${moduleName}/data-model.md`,
+      `project/modules/${moduleName}/permissions.md`,
+      `project/modules/${moduleName}/test-matrix.md`,
+      `project/modules/${moduleName}/handoff.md`
+    ]);
+  }
+});
+
+check('frontend design-system catalog', () => {
+  requireFiles([
+    'frontend/src/components/COMPONENTS.md',
+    'project/UI.md',
+    'docs/standards/frontend-standards.md',
+    'docs/standards/frontend-engineering-quality.md'
+  ]);
+  requirePhrases('frontend/src/components/COMPONENTS.md', [
+    'Component name',
+    'Purpose',
+    'Props summary',
+    'Allowed usage',
+    'Related module',
+    'Accessibility notes',
+    'Do not add ad-hoc CSS',
+    'inline style objects',
+    'Tailwind/Shadcn-compatible',
+    'project/UI.md',
+    'ui.contract.md'
+  ]);
+});
+
+runScript('state readiness', 'scripts/task-ready-check.mjs');
+runScript('spec-kit JSON specs', 'scripts/check-spec-kit-contracts.mjs');
+runScript('contract artifacts', 'scripts/check-contract-artifacts.mjs');
+runScript('DTO checks', 'scripts/check-dto.mjs');
+runScript('dependency boundaries', 'scripts/check-dependencies.mjs');
+runScript('security scanner', 'scripts/security-scanner.mjs');
+runScript('quality gates', 'scripts/check-quality-gates.mjs');
+runScript('template cache', 'scripts/check-template-cache.mjs');
+runScript('constitution check', 'scripts/check-constitution.mjs', {
+  optional: true,
+  when: exists('docs/constitution.md')
+});
+runScript('skill metadata', 'scripts/check-skill-metadata.mjs', {
+  optional: true,
+  when: exists('.agents/skills')
+});
+runScript('agent handoff schema', 'scripts/check-agent-handoff.mjs');
+runScript('untrusted instruction rules', 'scripts/check-untrusted-instructions.mjs', {
+  optional: true,
+  when: exists('.agents/rules/untrusted-input.md')
+});
+
+for (const result of results) {
+  const suffix = result.detail ? `: ${result.detail}` : '';
+  console.log(`${result.status}: ${result.name}${suffix}`);
 }
-if (!failed) ok('constitution, hook policy, handoff schema, untrusted-input safety and tool adapters are present');
 
+const failed = results.some(result => result.status === 'FAIL');
 if (failed) process.exit(1);
-console.log('OK: token-optimized architectural factory validator passed');
+console.log('OK: factory validator passed');

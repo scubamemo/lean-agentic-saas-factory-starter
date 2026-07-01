@@ -1,7 +1,105 @@
 {
   "schema": "agentic.factory.SpecKitModuleSpec.v1",
   "module": "<module-name>",
+  "version": "0.1.0",
   "status": "draft",
+  "resources": [
+    {
+      "name": "<ModuleName>",
+      "ownership": "tenant-owned",
+      "dto": "<ModuleName>Dto",
+      "tenant_owned": true
+    }
+  ],
+  "dto_schemas": {
+    "<ModuleName>Dto": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "createdAt",
+        "updatedAt"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "<ModuleName>ListResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "items",
+        "page",
+        "pageSize",
+        "total"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/<ModuleName>Dto"
+          }
+        },
+        "page": {
+          "type": "integer"
+        },
+        "pageSize": {
+          "type": "integer"
+        },
+        "total": {
+          "type": "integer"
+        }
+      }
+    }
+  },
+  "endpoints": [
+    {
+      "operationId": "list<ModuleName>",
+      "method": "GET",
+      "path": "/api/<module>",
+      "request_schema": "List<ModuleName>Query",
+      "response_schema": "<ModuleName>ListResponse",
+      "error_codes": [
+        401,
+        403,
+        500
+      ],
+      "permission": "<module-name>.resource.read"
+    }
+  ],
+  "permissions": [
+    {
+      "name": "<module-name>.resource.read",
+      "description": "Read <module-name> records."
+    }
+  ],
+  "ui_surfaces": [
+    {
+      "route": "/<module>",
+      "purpose": "List <module-name> records.",
+      "states": [
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "success"
+      ],
+      "actions": [
+        "list"
+      ]
+    }
+  ],
+  "events": [],
   "spec": {
     "summary": "TBD: describe the <module-name> module in business terms.",
     "user_stories": [
@@ -220,7 +318,7 @@
     "Run node scripts/check-dependencies.mjs"
   ],
   "validation": {
-    "contract_source_of_truth": "packages/contracts/specs/<module-name>.spec.json",
-    "markdown_mirror": "project/modules/<module-name>/api.contract.md"
+    "contract_source_of_truth": "packages/contracts/specs/_template.spec.json",
+    "markdown_mirror": "project/modules/_template/api.contract.md"
   }
 }

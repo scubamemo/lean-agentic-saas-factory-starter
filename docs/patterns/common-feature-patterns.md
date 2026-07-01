@@ -19,6 +19,7 @@ Quality notes:
 
 - list endpoints must paginate,
 - tenant-owned queries must filter by tenant context,
+- tenant-owned persisted entities must include `tenantId`, `createdAt`, and `updatedAt`,
 - destructive actions require confirmation,
 - UI must define loading, empty, error, forbidden, and success states.
 

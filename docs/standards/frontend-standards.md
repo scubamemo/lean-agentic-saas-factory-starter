@@ -12,10 +12,17 @@ project/modules/<module>/ui.contract.md
 project/modules/<module>/api.contract.md
 project/modules/<module>/dto.md
 project/modules/<module>/permissions.md
+packages/contracts/
+packages/api-client/
 docs/standards/frontend-standards.md
 ```
 
 Frontend must not inspect backend implementation unless the active work order explicitly allows it.
+
+Frontend implementation must be contract-first. `ui.contract.md`,
+`api.contract.md`, `dto.md`, `permissions.md`, `packages/contracts/` and
+generated or maintained `packages/api-client/` outputs are the accepted
+communication artifacts between frontend and backend.
 
 ## Design system enforcement
 
@@ -36,6 +43,7 @@ Forbidden unless approved by Architect/Designer:
 ```text
 ad-hoc CSS files
 inline styles for layout/theming
+inline style objects except approved dynamic CSS variables
 new color scales outside project/UI.md
 unapproved UI libraries
 copy-pasted one-off components that should be reusable
@@ -49,8 +57,23 @@ Any new reusable component must be:
 1. Built from the design system.
 2. Typed with explicit props.
 3. Reusable across modules or clearly documented as module-local.
-4. Documented in `frontend/src/components/COMPONENTS.md` or the nearest README under `frontend/src/components/`.
+4. Documented in `frontend/src/components/COMPONENTS.md`.
 5. Validated against `ui.contract.md` states and actions.
+
+Before creating a component, inspect `frontend/src/components/` and
+`frontend/src/components/COMPONENTS.md`. Reuse an existing component when it has
+the same purpose. Refactor a similar component when a small generalization is
+clearer than duplication. New reusable components are allowed only when reuse
+or refactor would violate `ui.contract.md` or reduce clarity.
+
+Every `COMPONENTS.md` entry must include:
+
+- component name;
+- purpose;
+- props summary;
+- allowed usage;
+- related module if module-specific;
+- accessibility notes.
 
 ## Required UI states
 
@@ -101,9 +124,12 @@ Frontend modules must not duplicate business logic or public data structures out
 Forbidden frontend patterns:
 
 - importing backend modules directly,
+- reading backend implementation to discover endpoints, DTOs, errors or permissions,
 - redefining backend DTOs inside `frontend/`,
 - creating UI behavior that conflicts with `ui.contract.md`,
 - using ad-hoc CSS, inline theme styles or unapproved design tokens,
+- using inline style objects unless explicitly approved for dynamic CSS variables,
+- creating reusable components without inspecting and updating `frontend/src/components/COMPONENTS.md`,
 - writing to `packages/contracts/` unless the active work order explicitly assigns contract maintenance to the frontend agent.
 
 Required frontend workflow:
@@ -120,6 +146,14 @@ Required frontend workflow:
 No business logic or data structures should be duplicated outside of `packages/contracts/` when they are part of public communication between agents, backend, frontend or integrations.
 
 Frontend must not import backend code directly. Frontend must not import `packages/shared/` except explicitly UI-compatible utilities under `packages/shared/ui-safe/` or `packages/shared/src/ui-safe/`. All backend/frontend communication must use `packages/contracts/` or generated `packages/api-client/` outputs.
+
+Frontend SoC rules:
+
+- Frontend must not import from `backend/`.
+- Frontend must never import from `backend/prisma/`, Prisma migrations, generated Prisma types or backend persistence internals.
+- Frontend/backend shared request, response, event and permission structures must come from `packages/contracts/` or generated `packages/api-client/` outputs.
+- Frontend must not import `packages/shared/` unless the exact target is explicitly UI-safe under `packages/shared/ui-safe/` or `packages/shared/src/ui-safe/`.
+- Direct frontend feature-to-feature imports are discouraged. If unavoidable, the Architect must approve the exact import and shared public shapes must still live in `packages/contracts/`.
 
 Before handoff, frontend-impacting work must run:
 
@@ -143,10 +177,17 @@ Required frontend quality rules:
 
 - Page components compose behavior; reusable components avoid module-specific business rules.
 - Component props must be typed, minimal and contract-aligned.
+- Page vs reusable component boundaries must follow `docs/standards/frontend-engineering-quality.md`.
+- Component APIs must be narrow, behavior-oriented and free of backend persistence models.
+- State must be colocated with the smallest component that needs it.
 - Server/API state should use the project API/query layer; do not duplicate DTO shapes.
 - Local UI state is preferred unless state is cross-page/session/global.
+- Global state is allowed only for session, tenant/workspace, feature flags or genuinely cross-page concerns.
+- Forms must validate from `ui.contract.md`, `dto.md` and `api.contract.md`, preserve recoverable input, and show accessible errors.
 - Loading, empty, error, forbidden, success and validation states must match `ui.contract.md`.
-- Accessibility basics are mandatory for interactive UI.
+- Accessibility, keyboard navigation and visible focus are mandatory for interactive UI.
+- Responsive behavior must preserve required actions, state feedback and usability.
+- Styling must use project design system tokens from `project/UI.md`; inline hardcoded styles and ad-hoc CSS outside the design system are forbidden.
 - Existing components must be reused or refactored before new components are created.
 - Every new or refactored reusable component must update `frontend/src/components/COMPONENTS.md`.
 

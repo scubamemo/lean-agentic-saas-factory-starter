@@ -12,7 +12,7 @@
     "frontend:dev": "pnpm --dir frontend dev",
     "frontend:typecheck": "pnpm --dir frontend typecheck",
     "frontend:test": "pnpm --dir frontend test",
-    "check:factory": "node scripts/factory-check.mjs && node scripts/check-dto.mjs && node scripts/check-contract-artifacts.mjs && node scripts/check-dependencies.mjs && node scripts/check-template-cache.mjs && node scripts/check-quality-gates.mjs && node scripts/check-spec-kit-contracts.mjs && node scripts/security-scanner.mjs && node scripts/check-constitution.mjs && node scripts/check-skill-metadata.mjs && node scripts/check-agent-handoff.mjs && node scripts/check-untrusted-instructions.mjs",
+    "check:factory": "node scripts/factory-check.mjs && node scripts/check-dto.mjs && node scripts/check-contract-artifacts.mjs && node scripts/check-dependencies.mjs && node scripts/check-template-cache.mjs && node scripts/check-quality-gates.mjs && node scripts/check-spec-kit-contracts.mjs && node scripts/security-scanner.mjs && node scripts/check-constitution.mjs && node scripts/check-skill-metadata.mjs && node scripts/check-agent-handoff.mjs && node scripts/check-untrusted-instructions.mjs && node scripts/check-export-template.mjs",
     "check:task": "node scripts/task-ready-check.mjs",
     "check:project": "pnpm check:factory && pnpm check:task && pnpm --dir backend check && pnpm --dir frontend check",
     "new:module": "node scripts/new-module.mjs",
@@ -34,6 +34,8 @@
     "check:skill-metadata": "node scripts/check-skill-metadata.mjs",
     "check:agent-handoff": "node scripts/check-agent-handoff.mjs",
     "check:untrusted": "node scripts/check-untrusted-instructions.mjs",
+    "check:export": "node scripts/check-export-template.mjs",
+    "export:tool-adapter": "node scripts/export-tool-adapter.mjs",
     "export:adapter": "node scripts/export-tool-adapter.mjs"
   },
   "devDependencies": {

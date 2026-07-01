@@ -1,6 +1,9 @@
 # Module Handoff
 
-Use this file for structured module handoffs. Human-readable notes are allowed, but every execution handoff must include a valid State Transition DTO.
+Use this sample-only file for structured module handoffs. Human-readable notes
+are allowed, but every execution handoff must include a schema-valid Agent
+Handoff Payload plus the compatibility State Transition DTO. Free-text alone is
+not a handoff.
 
 ## Current status
 
@@ -8,7 +11,32 @@ PLANNED
 
 ## Human summary
 
-TBD
+Sample-only module handoff for validating the reusable factory template.
+
+## Agent Handoff Payload
+
+```json
+{
+  "schema_version": "agentic.factory.AgentHandoff.v1",
+  "source_agent": "pm",
+  "target_agent": "pm",
+  "work_order_id": "WO-0001",
+  "module": "sample-resource",
+  "current_state": "PLANNED",
+  "next_state": "IN_PROGRESS",
+  "contract_version": "0.1.0",
+  "changed_artifacts": [
+    "examples/golden/sample-resource-module/api.contract.md",
+    "examples/golden/sample-resource-module/ui.contract.md",
+    "examples/golden/sample-resource-module/dto.md"
+  ],
+  "changed_files": [],
+  "scripts_run": [],
+  "validation_errors": [],
+  "blockers": [],
+  "next_action": "Use this sample-only handoff as a schema-valid reference for generated modules."
+}
+```
 
 ## State Transition DTO
 
@@ -23,7 +51,7 @@ TBD
   "current_state": "PLANNED",
   "next_state": "IN_PROGRESS",
   "payload": {
-    "summary": "TBD",
+    "summary": "Sample-only State Transition DTO retained for compatibility validation.",
     "changed_files": [],
     "contracts_updated": [],
     "diff_refs": [],

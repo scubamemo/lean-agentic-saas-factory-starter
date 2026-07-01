@@ -1,76 +1,109 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "agentic.factory.AgentHandoff.v1",
-  "title": "Agent Handoff DTO",
+  "title": "Agent Handoff Payload",
+  "description": "Machine-readable handoff payload required in module handoff.md files. Free-text notes may exist, but this payload is the validator-owned handoff contract.",
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "schema",
+    "schema_version",
     "source_agent",
     "target_agent",
     "work_order_id",
-    "contract_version",
     "module",
     "current_state",
     "next_state",
-    "payload",
-    "context_budget"
+    "contract_version",
+    "changed_artifacts",
+    "changed_files",
+    "scripts_run",
+    "validation_errors",
+    "blockers",
+    "next_action"
   ],
   "properties": {
-    "schema": {
-      "const": "agentic.factory.StateTransition.v1"
+    "schema_version": {
+      "type": "string",
+      "const": "agentic.factory.AgentHandoff.v1"
     },
     "source_agent": {
-      "type": "string",
-      "enum": [
-        "pm",
-        "architect",
-        "designer",
-        "data-engineer",
-        "backend-developer",
-        "frontend-developer",
-        "qa",
-        "code-reviewer"
-      ]
+      "$ref": "#/$defs/agent"
     },
     "target_agent": {
-      "type": "string",
-      "enum": [
-        "pm",
-        "architect",
-        "designer",
-        "data-engineer",
-        "backend-developer",
-        "frontend-developer",
-        "qa",
-        "code-reviewer"
-      ]
+      "$ref": "#/$defs/agent"
     },
     "work_order_id": {
       "type": "string",
       "pattern": "^WO-[0-9A-Za-z._-]+$"
-    },
-    "contract_version": {
-      "type": "string",
-      "minLength": 1
     },
     "module": {
       "type": "string",
       "minLength": 1
     },
     "current_state": {
-      "type": "string",
-      "enum": [
-        "PLANNED",
-        "IN_PROGRESS",
-        "VALIDATION_REQUIRED",
-        "QA_PENDING",
-        "APPROVED",
-        "COMPLETED",
-        "FAILED"
-      ]
+      "$ref": "#/$defs/work_order_state"
     },
     "next_state": {
+      "$ref": "#/$defs/work_order_state"
+    },
+    "contract_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "changed_artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/repository_path"
+      }
+    },
+    "changed_files": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/repository_path"
+      }
+    },
+    "scripts_run": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "validation_errors": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "agent": {
+      "type": "string",
+      "enum": [
+        "pm",
+        "architect",
+        "designer",
+        "data-engineer",
+        "backend-developer",
+        "frontend-developer",
+        "qa",
+        "code-reviewer",
+        "human"
+      ]
+    },
+    "work_order_state": {
       "type": "string",
       "enum": [
         "PLANNED",
@@ -79,95 +112,14 @@
         "QA_PENDING",
         "APPROVED",
         "COMPLETED",
-        "FAILED"
+        "FAILED",
+        "REVISION_IN_PROGRESS"
       ]
     },
-    "payload": {
-      "type": "object",
-      "additionalProperties": true,
-      "required": [
-        "summary",
-        "changed_files",
-        "contracts_updated",
-        "diff_refs",
-        "checks_run",
-        "blockers",
-        "feedback",
-        "next_actions"
-      ],
-      "properties": {
-        "summary": {
-          "type": "string"
-        },
-        "changed_files": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "contracts_updated": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "diff_refs": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "checks_run": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "blockers": {
-          "type": "array"
-        },
-        "feedback": {
-          "type": "array"
-        },
-        "next_actions": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "context_budget": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "mode",
-        "files_read_count",
-        "history_pruned",
-        "full_repo_scan"
-      ],
-      "properties": {
-        "mode": {
-          "type": "string",
-          "enum": [
-            "small",
-            "medium",
-            "large"
-          ]
-        },
-        "files_read_count": {
-          "type": "number",
-          "minimum": 0
-        },
-        "history_pruned": {
-          "type": "boolean",
-          "const": true
-        },
-        "full_repo_scan": {
-          "type": "boolean",
-          "const": false
-        }
-      }
+    "repository_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^\\n\\r]+$"
     }
   }
 }

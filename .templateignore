@@ -6,5 +6,8 @@ dist/
 build/
 .next/
 coverage/
+project/work-orders/factory-handoff.md
+project/work-orders/_bugfix-template.md
+project/work-orders/traces/**
 .env
 .env.local

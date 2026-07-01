@@ -1,59 +1,102 @@
 # Bugfix Work Order
 
-This file is created or updated by QA or Code Reviewer when a check fails. QA/Reviewer must not fix the implementation directly.
+This file is the structured QA-to-owner bugfix packet. QA or Code Reviewer
+updates it only when a validation gate fails. QA and Code Reviewer must not fix
+implementation code directly.
 
-## ID
+## Current bugfix status
 
-BUGFIX-TBD
+No active failing bugfix is open. When QA finds a failure, replace the fields
+below with observed evidence from the failing command and route the work to the
+suspected owner.
 
 ## Parent work order
 
-WO-0001
+WO-FACTORY-ALIGN-001
 
 ## Target module
 
-TBD
+_template
 
-## Target owner
+## Suspected owner
 
-backend-developer / frontend-developer / data-engineer / architect
+architect
 
-## Status
+Allowed owner values:
 
-FAILED
+- `backend-developer`
+- `frontend-developer`
+- `data-engineer`
+- `architect`
+- `designer`
 
-## Failure summary
+## Failure isolation checklist
 
-TBD
+QA must capture all items before routing:
 
-## Failing command
+- command run;
+- stdout/stderr excerpt;
+- failing test suite or test name;
+- failing file and line when available;
+- suspected owner and why;
+- relevant contract section or `test-matrix.md` row;
+- expected result;
+- actual result;
+- smallest reproduction scope;
+- whether the same command was rerun after the owner fix.
 
-```bash
-TBD
+## Structured bugfix payload
+
+```json
+{
+  "schema": "agentic.factory.BugfixWorkOrder.v1",
+  "status": "not-open",
+  "parent_work_order_id": "WO-FACTORY-ALIGN-001",
+  "module": "_template",
+  "failure": {
+    "command_run": "No failing command is currently open.",
+    "stdout_stderr_excerpt": "No failing output is currently recorded.",
+    "failing_test_name": "No failing test is currently recorded.",
+    "failing_file_line": "No failing file or line is currently recorded.",
+    "expected_result": "All required validation gates pass.",
+    "actual_result": "All required validation gates currently pass.",
+    "smallest_reproduction_scope": "No reproduction scope is active."
+  },
+  "routing": {
+    "suspected_owner": "architect",
+    "owner_reason": "No active failure; architect owns this factory-maintenance packet structure.",
+    "relevant_contract_or_test_matrix_row": "project/work-orders/factory-test-matrix.md"
+  },
+  "qa_evidence": {
+    "qa_must_not_fix_code": true,
+    "state_update_required_on_failure": true,
+    "state_status_on_failure": "FAILED or REVISION_IN_PROGRESS",
+    "validation_errors_append_required": true
+  },
+  "developer_action": {
+    "read_only_context": [
+      "project/work-orders/state.json",
+      "project/work-orders/bugfix.md",
+      "target module context.md",
+      "role-specific contract artifacts named by QA"
+    ],
+    "fix_rule": "Original owner fixes the smallest allowed implementation set and returns to VALIDATION_REQUIRED.",
+    "qa_recheck_rule": "QA reruns the exact failing command first, then the remaining required gates."
+  }
+}
 ```
 
-## STDOUT / STDERR excerpt
+## State update rule for QA
 
-```text
-TBD
-```
+When opening a real bugfix, QA updates `project/work-orders/state.json` by
+changing only QA-owned workflow fields:
 
-## Precise failing context
-
-| File | Lines | Rule/check | Expected | Actual |
-|---|---|---|---|---|
-| TBD | TBD | TBD | TBD | TBD |
-
-## Relevant artifacts
-
-- `project/modules/<module>/api.contract.md`
-- `project/modules/<module>/ui.contract.md`
-- `project/modules/<module>/test-matrix.md`
-- `project/modules/<module>/handoff.md`
-
-## Required developer action
-
-TBD
+- append a focused object to `validation_errors`;
+- update `agent_payloads.qa` with the failure summary and evidence;
+- set or request `FAILED` or `REVISION_IN_PROGRESS` according to
+  `allowed_transitions`;
+- identify the target owner in `next_agent` or `agent_payloads.qa`;
+- preserve unrelated role payloads and implementation state.
 
 ## State Transition DTO
 
@@ -61,29 +104,28 @@ TBD
 {
   "schema": "agentic.factory.StateTransition.v1",
   "source_agent": "qa",
-  "target_agent": "backend-developer",
-  "work_order_id": "WO-0001",
+  "target_agent": "architect",
+  "work_order_id": "WO-FACTORY-ALIGN-001",
   "contract_version": "0.1.0",
-  "module": "TBD",
-  "current_state": "QA_PENDING",
-  "next_state": "FAILED",
+  "module": "_template",
+  "current_state": "FAILED",
+  "next_state": "REVISION_IN_PROGRESS",
   "payload": {
-    "summary": "TBD",
+    "summary": "No active bugfix is open. This DTO defines the required QA-to-owner routing shape for future failures.",
     "changed_files": [
-      "project/work-orders/bugfix.md",
-      "project/modules/<module>/test-matrix.md",
-      "project/modules/<module>/handoff.md"
+      "project/work-orders/bugfix.md"
     ],
     "contracts_updated": [
-      "api.contract.md",
-      "ui.contract.md",
-      "test-matrix.md"
+      "test-matrix.md",
+      "bugfix feedback loop contract"
     ],
     "diff_refs": [],
     "checks_run": [],
     "blockers": [],
     "feedback": [],
-    "next_actions": []
+    "next_actions": [
+      "When QA observes a failure, replace this packet with exact failure evidence and route to the suspected owner."
+    ]
   },
   "context_budget": {
     "mode": "small",

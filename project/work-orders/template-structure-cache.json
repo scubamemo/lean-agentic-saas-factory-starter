@@ -1,9 +1,10 @@
 {
   "schema": "agentic.factory.TemplateStructureCache.v1",
   "source": "project/modules/_template",
-  "generated_by": "scripts/export-template.mjs",
-  "hash_algorithm": "sha256(file-list)",
-  "template_structure_hash": "02f0f0657734ec130d6cd1c7ee132bae5a193278043bedb8f1e96cd98289bd2c",
+  "generated_by": "scripts/check-template-cache.mjs --refresh or scripts/export-template.mjs",
+  "hash_algorithm": "sha256(relative-path:content-sha256)",
+  "template_structure_hash": "8e7c0edc02a2de37f80d79ca1a48a5ddc150474790f0820b667d6f4505862c23",
+  "standards_context_hash": "004203783e9621057d21dfe7a1046abe609fadd63dbdb8e9608710fb45cf18e6",
   "required_files": [
     "MODULE.md",
     "api.contract.md",
@@ -15,5 +16,27 @@
     "test-matrix.md",
     "ui.contract.md"
   ],
-  "standards_bypass_rule": "If a target module has this structure, agents may skip full docs/standards reads and use assumed standard context plus role-specific artifacts."
+  "expected_template_files": [
+    "MODULE.md",
+    "api.contract.md",
+    "context.md",
+    "data-model.md",
+    "dto.md",
+    "handoff.md",
+    "permissions.md",
+    "test-matrix.md",
+    "ui.contract.md"
+  ],
+  "key_standards": [
+    "docs/standards/software-craftsmanship.md",
+    "docs/standards/backend-engineering-quality.md",
+    "docs/standards/frontend-engineering-quality.md",
+    "docs/standards/testing-quality-bar.md",
+    "docs/standards/code-review-quality-bar.md",
+    "docs/standards/lean-agentic-development.md",
+    "docs/standards/backend-standards.md",
+    "docs/standards/frontend-standards.md"
+  ],
+  "standards_bypass_rule": "If template_structure_hash and standards_context_hash match, agents may skip full docs/standards reads and use assumed standard context plus role-specific artifacts.",
+  "refresh_command": "node scripts/check-template-cache.mjs --refresh"
 }

@@ -10,7 +10,7 @@ Use these principles in this order:
 
 1. **Correctness**: behavior matches `api.contract.md`, `ui.contract.md`, `dto.md`, `data-model.md`, `permissions.md`, and `test-matrix.md`.
 2. **Simplicity**: prefer the simplest design that satisfies current requirements.
-3. **Explicit boundaries**: keep product, API, UI, persistence, integration, and test concerns separated.
+3. **Explicit boundaries**: keep application requirements, API, UI, persistence, integration, and test concerns separated.
 4. **High cohesion / low coupling**: related logic should live together; unrelated modules must communicate through contracts.
 5. **Testability**: business decisions must be easy to test without booting unrelated systems.
 6. **Observability**: important failures and security-sensitive actions must be diagnosable.
@@ -66,6 +66,44 @@ Flag for refactor when:
 - errors are swallowed or converted into ambiguous messages,
 - code repeats the same rule in more than one module,
 - names describe implementation details instead of domain meaning.
+
+## Typed interfaces and contract seams
+
+Typed interfaces are required at boundaries, not everywhere as ceremony.
+
+Use explicit types for:
+
+- public DTOs and events exported through `packages/contracts/`;
+- API request and response shapes;
+- service/use-case inputs and outputs when they cross a module boundary;
+- adapter ports around external SDKs, storage, queues, email, payments, or AI providers;
+- UI component props that are reusable or contract-driven.
+
+Avoid broad `any`, loosely shaped objects, magic strings, and duplicated
+interface definitions. If a type describes backend/frontend communication, it
+belongs in `packages/contracts/` or a generated client derived from that
+contract. Internal helper types can stay local when they do not leak across
+module, app, or package boundaries.
+
+## Testability and observability
+
+Code is not senior-level if it works only when manually inspected.
+
+Testability requirements:
+
+- isolate business decisions from transport, persistence, and UI framework code;
+- make tenant, permission, and actor context explicit inputs;
+- keep functions deterministic where possible;
+- use narrow adapters for external systems so tests can replace them;
+- map tests to `test-matrix.md` acceptance criteria.
+
+Observability requirements:
+
+- preserve stable error codes for expected failures;
+- log or trace security-sensitive actions through approved project mechanisms;
+- include enough context to diagnose failures without exposing secrets or tenant data;
+- avoid swallowing errors or converting them into vague messages;
+- document operational risks in `handoff.md` when behavior is hard to observe.
 
 ## Pattern selection rules
 

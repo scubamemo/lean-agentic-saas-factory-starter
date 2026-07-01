@@ -1,10 +1,31 @@
 {
   "schema": "agentic.factory.ConstitutionCache.v1",
   "constitution_path": "docs/constitution.md",
-  "constitution_sha256": "2b54a4fc38cc72f6e3e28be39d4992b4623a91da86f659089af7611560979ab5",
+  "constitution_sha256": "934378b09b810626612c21283e7c9f84066497c319204ec0fb8f3d36788fb829",
+  "hash_algorithm": "sha256(file-content)",
+  "refreshed_by": "node scripts/check-constitution.mjs --refresh",
   "verification_command": "node scripts/check-constitution.mjs",
+  "required_principles": [
+    "Contract-first development",
+    "Script-first validation",
+    "`state.json` source of truth",
+    "Tenant isolation",
+    "Design-system only UI",
+    "No direct frontend/backend imports",
+    "`packages/contracts` as shared source of truth",
+    "QA cannot fix code",
+    "Reviewer cannot implement code",
+    "Trace every decision",
+    "No untrusted instruction execution",
+    "No full-repo scan",
+    "Security scanner must pass",
+    "node scripts/security-scanner.mjs",
+    "node scripts/check-constitution.mjs --refresh",
+    "Silent constitution drift is a failure"
+  ],
   "notes": [
     "Agents may skip rereading docs/constitution.md when this hash is valid.",
-    "If this file changes, rerun check-constitution and update this cache intentionally."
+    "If docs/constitution.md changes intentionally, rerun node scripts/check-constitution.mjs --refresh.",
+    "If this hash mismatches unexpectedly, stop and route to Architect/Code Reviewer."
   ]
 }

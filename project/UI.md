@@ -1,6 +1,6 @@
 # UI Direction
 
-## Product feel
+## Application feel
 
 TBD: simple/admin, modern SaaS, data-heavy, mobile-friendly, etc.
 
